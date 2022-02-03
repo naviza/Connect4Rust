@@ -19,4 +19,5 @@ public class PickShareFunctional {
 										.toList();
 		return shareInfo.get(0);
 	}
+
 }
