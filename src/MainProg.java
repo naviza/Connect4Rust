@@ -1,9 +1,9 @@
 
-public class main {
+public class MainProg {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		System.out.printf("%d", PickShareFunctional.findHighPriced(Shares.symbols.stream()).price.intValue());
+		System.out.println("Hello World, Java app");
 	}
 
 }
