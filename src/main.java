@@ -1,20 +1,16 @@
 public class main {
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+	public static void main(String[] args) {		
 		
-		System.out.println(PickShareFunctional.findHighPriced(Shares.symbols.stream()).get().price.get().intValue());
-		
-
 		long streamStart = System.currentTimeMillis();
-		PickShareFunctional.findHighPriced(Shares.symbols.stream());
+		System.out.println(PickShareFunctional.findHighPriced(Shares.symbols.stream()).get().price.get().intValue());
 		long streamEnd = System.currentTimeMillis();
 		System.out.println((streamEnd-streamStart));
 
 		long parallelStart = System.currentTimeMillis();
-		PickShareFunctional.findHighPriced(Shares.symbols.parallelStream());
+		System.out.println(PickShareFunctional.findHighPriced(Shares.symbols.parallelStream()).get().price.get().intValue());
 		long parallelEnd = System.currentTimeMillis();
-
+		
 		System.out.println(parallelEnd-parallelStart);
 	
 	}

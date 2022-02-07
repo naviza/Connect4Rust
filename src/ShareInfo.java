@@ -11,6 +11,6 @@ public class ShareInfo {
 	}
 	
 	public String toString() {
-		return String.format("symbol: %s price: %g", symbol, price);
+		return String.format("symbol: %s price: %g", symbol, price.get());
 	}
 }

@@ -9,14 +9,7 @@ public class PickShareFunctional {
 	private static final BigDecimal MIN_PRICE = new BigDecimal(500);
 	
 	public static Optional<ShareInfo> findHighPriced(Stream<String> shares) {
-		Optional<ShareInfo> shareInfo = shares.map(share -> { 
-																try {
-																		TimeUnit.SECONDS.sleep(12);
-																} catch (InterruptedException e) {
-																	// TODO Auto-generated catch block
-																	e.printStackTrace();
-																}
-																return new ShareInfo((String) share, APIFinance.getPrice((String) share));})
+		Optional<ShareInfo> shareInfo = shares.map(share ->  new ShareInfo((String) share, APIFinance.getPrice((String) share)))
 										.filter(share -> share.price.isPresent())
 										.filter(share -> share.price.get().compareTo(MIN_PRICE) > 0)
 										.reduce((share1, share2) -> ShareUtil.pickHigh(share1, share2));
