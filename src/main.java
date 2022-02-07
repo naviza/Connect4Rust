@@ -7,15 +7,15 @@ public class main {
 	public static void main(String[] args) {		
 		
 		long streamStart = System.currentTimeMillis();
-		System.out.println(PickShareFunctional.findHighPriced(Shares.symbols.stream()).get().price.get().intValue());
+		System.out.println("Highest share price is " + PickShareFunctional.findHighPriced(Shares.symbols.stream()).get());
 		long streamEnd = System.currentTimeMillis();
-		System.out.println((streamEnd-streamStart));
+		System.out.println("Time taken (ms) = " + (streamEnd-streamStart));
 
 		long parallelStart = System.currentTimeMillis();
-		System.out.println(PickShareFunctional.findHighPriced(Shares.symbols.parallelStream()).get().price.get().intValue());
+		System.out.println("Highest share price is " + PickShareFunctional.findHighPriced(Shares.symbols.parallelStream()).get());
 		long parallelEnd = System.currentTimeMillis();
 		
-		System.out.println(parallelEnd-parallelStart);
+		System.out.println("Time taken (ms) = " + (parallelEnd-parallelStart));
 
 		// extraTests();
 	
