@@ -10,12 +10,19 @@ import java.util.concurrent.TimeUnit;
 public class APIFinance {
 	private static final String BASE_URL = "https://www.alphavantage.co/query?";
 	private final static String apiKey = "0BEBA6Z10REBY4Z5";
+	private volatile static int counter = 0;  // Counter of number of API calls that shares between threads
 
-	public static synchronized Optional<BigDecimal> getPrice(final String symbol) {
+	public static Optional<BigDecimal> getPrice(final String symbol) {
 		try {
-			// Sleep to limit API calls to 5 per minute
-			TimeUnit.SECONDS.sleep(12);
-			// define the URL for API Access
+			// Checks that only 5 API calls are made per minute
+			synchronized (APIFinance.class) {
+				if (counter > 5) {
+					TimeUnit.SECONDS.sleep(60);  // Sleep for a minute to reset API
+					counter = 0;  // Reset counter
+					// System.out.println("I slept");
+				}
+				counter++;
+			}
 			URL url = new URL(BASE_URL + "function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=" + apiKey);
 			// Instantiate the objects to obtain values
 			URLConnection connection = url.openConnection();
@@ -35,5 +42,9 @@ public class APIFinance {
 			System.out.println("Failure with the sleep function.");
 		}
 		return Optional.empty();
+	}
+	
+	public static void reset_counter() {
+		counter = 0;
 	}
 }
