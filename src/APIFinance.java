@@ -13,18 +13,26 @@ public class APIFinance {
 
 	public static synchronized Optional<BigDecimal> getPrice(final String symbol) {
 		try {
+			// Sleep to limit API calls to 5 per minute
 			TimeUnit.SECONDS.sleep(12);
+			// define the URL for API Access
 			URL url = new URL(BASE_URL + "function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=" + apiKey);
+			// Instantiate the objects to obtain values
 			URLConnection connection = url.openConnection();
 			InputStreamReader inputStream = new InputStreamReader(connection.getInputStream(), "UTF-8");
 			BufferedReader bufferedReader = new BufferedReader(inputStream);
-			BigDecimal price = new BigDecimal((bufferedReader.lines().filter(line -> line.contains("price")).findFirst().map(value -> value.split("\"")[3].trim()).orElse("0")));
-			bufferedReader.close();
-			return Optional.of(price);
+			// Process the buffered stream of lines
+			return (bufferedReader.lines()
+				.filter(line -> line.contains("price")) // take the line that indicates "price"
+				// map the value to an Optional<BigDecimal> if it exists
+				.findFirst().map(value -> Optional.of(new BigDecimal(value.split("\"")[3].trim())))
+				.orElse(Optional.empty())); // return Empty if the "price" line does not exist
+			// bufferedReader.close();
+			// return Optional.of(price);
 		} catch (IOException e) {
-			System.out.println("failure sending requests");
+			System.out.println("Failure to send request.");
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			System.out.println("Failure with the sleep function.");
 		}
 		return Optional.empty();
 	}
