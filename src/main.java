@@ -29,33 +29,45 @@ public class main {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        // extraTests();    
+        // extraTests();
     }
 
 	private static void extraTests(){
+        // Tests for APIFinance.getPrice
 		System.out.println("AMZN Price: " + APIFinance.getPrice("AMZN").toString());
 		System.out.println("ABCDEFG Price: " + APIFinance.getPrice("ABCDEFG").toString());
 		System.out.println("Empty string Price: " + APIFinance.getPrice("").toString());
 
-		List<String> testList = Arrays.asList("SHOP", "TSLA");
-		System.out.println("{SHOP, TSLA}: " +
-			PickShareFunctional.findHighPriced(testList.stream()).get().toString()
-			);
 
-		testList = Arrays.asList();
-		System.out.println("{}: " +
-			PickShareFunctional.findHighPriced(testList.stream()).toString()
-			);
-		
-		testList = Arrays.asList("SHOP");
-		System.out.println("{SHOP}: " +
-			PickShareFunctional.findHighPriced(testList.stream()).get().toString()
-			);
-		
-		System.out.println(PickShareFunctional.findHighPriced(Shares.symbols.stream()).get().price.get().intValue());
-		List<String> noAmazon = new ArrayList<String>(Shares.symbols); noAmazon.remove("AMZN");
-		System.out.println(
-			PickShareFunctional.findHighPriced(noAmazon.stream()).get()
-			);
+        try {
+            // Small Tests for PickShareFunctional.findHighPriced
+            TimeUnit.SECONDS.sleep(60); // Have to reset the timer
+            APIFinance.reset_counter(); // also reset the timer
+            List<String> testList = Arrays.asList("SHOP", "TSLA");
+            System.out.println("{SHOP, TSLA}: " +
+                PickShareFunctional.findHighPriced(testList.stream()).toString()
+                );
+
+            testList = Arrays.asList();
+            System.out.println("{}: " +
+                PickShareFunctional.findHighPriced(testList.stream()).toString()
+                );
+            
+            testList = Arrays.asList("SHOP");
+            System.out.println("{SHOP}: " +
+                PickShareFunctional.findHighPriced(testList.stream()).toString()
+                );
+            
+            TimeUnit.SECONDS.sleep(60);
+            APIFinance.reset_counter();
+            // Big Tests for PickShareFunctional.findHighPriced
+            System.out.println(PickShareFunctional.findHighPriced(Shares.symbols.stream()));
+            List<String> noAmazon = new ArrayList<String>(Shares.symbols); noAmazon.remove("AMZN");
+            System.out.println(
+                PickShareFunctional.findHighPriced(noAmazon.stream())
+                );
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 	}
 }
