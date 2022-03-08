@@ -1,14 +1,16 @@
+
+
+
+
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::{thread, time};
-use std::io;
 
 type Tree = Rc<RefCell<TreeNode<u32>>>;
-type AVLTree= Option<Tree>;
+pub type AVLTree= Option<Tree>;
 // type AVLTree= Option<Rc<RefCell<TreeNode<u32>>>>;
 
 #[derive(Clone,PartialEq)]
-struct TreeNode<T> {
+pub struct TreeNode<T> {
     pub data: T,
     pub parent: AVLTree,
     left: AVLTree,
@@ -93,15 +95,15 @@ fn print_in_order(tree: &AVLTree){
 // 	}
 // }
 
-// fn change_node_value(node: AVLTree) {
-// 	match (node) {
-// 		None => {},
-// 		Some(main_node) => {
-// 			let mut holder = main_node.borrow_mut();
-// 			holder.data = 4;
-// 		}
-// 	}
-// }
+fn change_node_value(node: AVLTree) {
+	match (node) {
+		None => {},
+		Some(main_node) => {
+			let mut holder = main_node.borrow_mut();
+			holder.data = 4;
+		}
+	}
+}
 
 fn right_rot(node: AVLTree) {
 	match node {
@@ -114,8 +116,6 @@ fn right_rot(node: AVLTree) {
 						None => {println!("node.left.left is None.");},
 						Some(left_left_child) => {
 							let mut left_left_holder = left_left_child.borrow_mut();
-
-
 							// match &main_holder.parent {
 							// 	None => {println!("node.parent is None.");},
 							// 	Some(node_parent) => {
@@ -124,9 +124,6 @@ fn right_rot(node: AVLTree) {
 							// }
 						}
 					}
-					// let left_left_holder = left_holder.left;
-					// let left_right_holder = left_holder.right;
-					// left_holder.data = 7;
 					println!("{}", left_holder.data);
 				},
 				None => {
@@ -221,23 +218,23 @@ fn right_rot(node: AVLTree) {
 // 	}
 // }
 
-// fn print_tree(tree: &AVLTree){
-// 	match tree {
-// 		None => {print!("nil");}
-// 		Some(x) => {
-// 			match &x.borrow().parent{
-// 				None => {print!("{}->(", x.borrow().data);}
-// 				Some(pair) => {print!("{}({}, {})->(", x.borrow().data, pair.borrow().data, x.borrow().height);}
-// 			}
-// 			print_tree(&x.borrow().left);
-// 			print!("),(");
-// 			print_tree(&x.borrow().right);
-// 			print!(")");
-// 		}
-// 	}
-// }
+fn print_tree(tree: &AVLTree){
+	match tree {
+		None => {print!("nil");}
+		Some(x) => {
+			match &x.borrow().parent{
+				None => {print!("{}->(", x.borrow().data);}
+				Some(pair) => {print!("{}({}, {})->(", x.borrow().data, pair.borrow().data, x.borrow().height);}
+			}
+			print_tree(&x.borrow().left);
+			print!("),(");
+			print_tree(&x.borrow().right);
+			print!(")");
+		}
+	}
+}
 
-fn new_avl(t: u32, if_root : bool) -> AVLTree {
+pub fn new_avl(t: u32, if_root : bool) -> AVLTree {
     if if_root {
         let node = TreeNode::new_node(t);
         let root = Some(Rc::new(RefCell::new(node)));
@@ -247,7 +244,7 @@ fn new_avl(t: u32, if_root : bool) -> AVLTree {
     }
 }
 
-fn insert_node(tree: &mut AVLTree, t: u32) -> AVLTree {
+pub fn insert_node(tree: &mut AVLTree, t: u32) -> AVLTree {
 	match tree {
 		Some(root) => {
 			let node;
@@ -329,6 +326,17 @@ fn find_node_help(tree: &AVLTree, t: u32) -> AVLTree {
 			println!("Node does not exist");
 			None
 		}
+	}
+}
+
+fn in_order_transversal(tree: &AVLTree) {
+	match tree {
+		Some(node) => {
+			in_order_transversal(&node.borrow().left);
+			println!("data = {}", node.borrow().data);
+			in_order_transversal(&node.borrow().right);
+		}
+		None => println!("Null Leaf"),
 	}
 }
 
@@ -480,207 +488,6 @@ fn left_rotate(node : &mut AVLTree) -> AVLTree{
 		},
 		None=> panic!("Should be a grandparent")
 	}
-}
-
-fn print_cmds() {
-	println!("\n--------------------------------------------------------------------");
-	println!("What do you want to do with the tree?");
-	println!("Type i if you want to insert into the tree");
-	println!("Type d if you want to delete data from the tree");
-	println!("Type c if you want to know how many leaves are in the tree");
-	println!("Type h if you want to know the height of the tree");
-	println!("Type o if you want to print the tree in-order traversal");
-	println!("Type e if you want to check if the tree is empty");
-	println!("Type p if you want to print the tree itself with direction");
-	println!("Type s if you want to know how many nodes the tree has");
-	println!("Type exit to end the program");
-	println!("--------------------------------------------------------------------");
-	println!("Type your input : ");
-}
-
-fn count_height(tree: &AVLTree) -> u32 {
-	let mut height = 1;
-	match tree {
-		Some(node) => {
-			let left = count_height(&node.borrow().left);
-			let right = count_height(&node.borrow().right);
-			if left >= right {
-				height += left;
-			} else {
-				height += right;
-			}
-			height
-		}
-		None => 0
-	}
-}
-
-fn in_order_transversal(tree: &AVLTree) {
-	match tree {
-		Some(node) => {
-			in_order_transversal(&node.borrow().left);
-			println!("data = {}", node.borrow().data);
-			in_order_transversal(&node.borrow().right);
-		}
-		None => println!("Null Leaf"),
-	}
-}
-
-fn size(tree: &AVLTree) -> u32 {
-	match tree {
-		Some(node) => {
-			let mut count = 1;
-			count += size(&node.borrow().left);
-			count += size(&node.borrow().right);
-			count
-		}
-		None => 0
-	}
-}
-
-fn print_tree(tree: &AVLTree, indent: usize) {
-	match tree {
-		Some(leaf) => {
-			print!("{:indent$}","",indent = indent);
-			println!("data: {},", leaf.borrow().data);
-			println!("{:indent$}Left {{","",indent = indent+5);
-			print_tree(&leaf.borrow().left,indent + 5);
-			print!("\n{:indent$}}}","",indent = indent+5);
-			println!("\n{:indent$}Right {{","",indent = indent+5);
-			print_tree(&leaf.borrow().right, indent + 5);
-			print!("\n{:indent$}}}\n","",indent = indent+5);
-		}
-		None => {
-			 print!("{:indent$}","",indent = indent+5);
-			print!("NULL Leaf");
-		}
-	};
-}
-
-fn is_empty(tree: &AVLTree) -> bool {
-	match tree {
-		Some(_) => false,
-		None => true
-	}
-}
-
-fn run() {
-	let mut root : u32 = 0;
-	let mut input_string = String::new();
-	let mut looping = true;
-	let mut tree : AVLTree;
-	let mut trimmed = "";
-
-	while looping {
-		println!("What do you want your root for a new tree is (Enter a positive integer, or 'exit' to exit the program) - ");
-		input_string = ("").to_string();
-		io::stdin().read_line(&mut input_string).expect("failed to readline");
-
-		trimmed = input_string.trim();
-
-		match trimmed.parse::<u32>() {
-			Ok(i) => {
-				root = i;
-				looping = false;
-			},
-			Err(..) => {
-				if trimmed == "exit" {
-					looping = false;
-					println!("Ending the program");
-				} else {
-					println!("this was not an integer: {}", trimmed)
-				}
-			},
-		};
-	}
-
-	
-	if trimmed != "exit" {
-		println!("Creating a new tree with the root data provided - {} ", root);
-		tree = new_avl(root , true);
-
-		while trimmed != "exit" {
-			print_cmds();
-			input_string = ("").to_string();
-			
-			io::stdin().read_line(&mut input_string).expect("failed to readline");
-	
-			trimmed = input_string.trim();
-			match trimmed {
-				"i" => {
-					println!("What value do you want to insert into the tree:");
-					input_string = ("").to_string();
-			
-					io::stdin().read_line(&mut input_string).expect("failed to readline");
-			
-					trimmed = input_string.trim();
-	
-					match trimmed.parse::<u32>() {
-						Ok(i) => {
-							tree = insert_node(&mut tree, i);
-						},
-						Err(..) => {
-							println!("this was not an integer: {}", trimmed)
-						},
-					};
-				},
-	
-				"d" => {
-					println!("What value do you want to delete from the tree:");
-					input_string = ("").to_string();
-			
-					io::stdin().read_line(&mut input_string).expect("failed to readline");
-			
-					trimmed = input_string.trim();
-	
-					match trimmed.parse::<u32>() {
-						Ok(i) => {
-							tree = delete(&mut tree, i);
-						},
-						Err(..) => {
-							println!("this was not an integer: {}", trimmed)
-						},
-					};
-				},
-	
-				"c" => println!("The amount of leaves this tree has is {}", count_leaves(&tree)),
-	
-				"h" => println!("The tree has a height of {}",count_height(&tree)),
-	
-				"o" => {
-					println!("Printing in-order transversal...");
-					in_order_transversal(&tree);
-				},
-	
-				"e" => {
-					println!("Checking if the tree is empty...");
-					if is_empty(&tree) {
-						println!("The tree is empty");
-					} else {
-						println!("The tree is not empty");
-					}
-				},
-	
-				"p" => {
-					println!("Printing the tree...");
-					print_tree(&tree, 0);
-				},
-
-				"s" => {
-					println!("Printing the size of the tree...");
-					println!("The tree has {} nodes", size(&tree));
-				},
-	
-				"exit" => println!("Exiting the program"),
-	
-				_ => println!("The command you entered is not found, please try again")
-			}
-		}
-	}
-}
-
-fn main() {
-	run();
 }
 
 
