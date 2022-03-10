@@ -7,7 +7,7 @@ pub enum NodeColor {
 	Black,
 }
 
-pub type Tree = Rc<RefCell<TreeNode<u32>>>;
+type Tree = Rc<RefCell<TreeNode<u32>>>;
 pub type RedBlackTree = Option<Tree>;
 
 #[derive(Clone, PartialEq)]
@@ -47,14 +47,8 @@ impl NodeColor {
 	}
 }
 
-pub fn new_rb(t: u32, if_root: bool) -> RedBlackTree {
-	if if_root {
-		let mut node = TreeNode::new_node(t);
-		node.color = NodeColor::Black;
-		Some(Rc::new(RefCell::new(node)))
-	} else {
-		Some(Rc::new(RefCell::new(TreeNode::new_node(t))))
-	}
+fn new_rb(t: u32) -> RedBlackTree {
+	Some(Rc::new(RefCell::new(TreeNode::new_node(t))))
 }
 
 /*
@@ -160,9 +154,11 @@ insert Functions
 */
 pub fn insert(tree: &mut RedBlackTree, t: u32) -> RedBlackTree {
 	if is_empty(tree) {
-		println!("Hey");
-	} else {
-		println!("Heys");
+		let new_tree = new_rb(t);
+		if let Some(ref x) = new_tree {
+			x.borrow_mut().color = NodeColor::Black;
+		}
+		return new_tree;
 	}
 	let rtree = insert_helper(tree, t);
 	let inserted_node = find_node(&mut rtree.clone(), t);
@@ -198,7 +194,7 @@ fn insert_helper(tree: &mut RedBlackTree, t: u32) -> RedBlackTree {
 				}
 			}
 		}
-		None => new_rb(t, false),
+		None => new_rb(t),
 	}
 }
 
