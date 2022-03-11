@@ -282,7 +282,7 @@ pub fn balance_tree(tree: &mut RedBlackTree) -> RedBlackTree {
 			let mut node_copy = node.borrow().parent.clone();
 			match node_copy {
 				Some(ref parent) => {
-					if !parent.borrow().color.is_red() {
+					if parent.borrow().color.is_black() {
 						return balance_tree(&mut node_copy);
 					}
 					let parent_copy = parent.borrow().parent.clone();
@@ -300,14 +300,12 @@ pub fn balance_tree(tree: &mut RedBlackTree) -> RedBlackTree {
 								}
 							};
 
-							let grandparent_copy: RedBlackTree;
+							let mut grandparent_copy: RedBlackTree = None;
 							if side == 1 {
 								grandparent_copy = grandparent.borrow().right.clone();
 							} else if side == 2 {
 								grandparent_copy = grandparent.borrow().left.clone();
-							} else {
-								grandparent_copy = None
-							};
+							}
 
 							if let Some(uncle) = grandparent_copy {
 								if uncle.borrow().color.is_red() {
@@ -321,14 +319,12 @@ pub fn balance_tree(tree: &mut RedBlackTree) -> RedBlackTree {
 											Some(Rc::new(RefCell::new(parent.borrow().clone())));
 									}
 									grandparent.borrow_mut().color = NodeColor::Red;
-									let mut temp = uncle.borrow().parent.clone();
-									return balance_tree(&mut temp);
+									return balance_tree(&mut Some(grandparent));
 								}
 							}
 						}
 						None => {
 							//parent is root
-							//panic!("Should not get here");
 							let mut temp = node.borrow().parent.clone();
 							return balance_tree(&mut temp);
 						}
@@ -347,7 +343,6 @@ pub fn balance_tree(tree: &mut RedBlackTree) -> RedBlackTree {
 			panic!("Error in inserting the node into the tree");
 		}
 	}
-
 	let rotation = check_rotation(&mut tree.clone());
 	let mut new_tree: RedBlackTree = None;
 	match rotation {
@@ -600,4 +595,5 @@ fn find_max(tree: &mut RedBlackTree) -> RedBlackTree {
 		None => {
 			return None;
 		}
-	}}
+	}
+}
