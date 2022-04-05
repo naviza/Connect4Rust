@@ -5,6 +5,7 @@ use yew_router::prelude::*;
 mod pages;
 
 use crate::pages::Connect4Instruction::Connect4Instruction;
+use crate::pages::Connect4Computer::Connect4Computer;
 
 #[derive(Debug, Clone, Copy, PartialEq, Routable)]
 enum Route {
@@ -55,8 +56,10 @@ fn c4_against_computer() -> Html {
 
     html! {
         <div>
-        <h1>{ "Connect 4 against a Computer" }</h1>
+        <h1>{ "Connect 4 against a Computer" }</h1> <br />
         <button onclick={onclick_callback1}>{ "Go to Home" }</button>
+        <br /><br />
+        <Connect4Computer />
         </div>
     }
 }
