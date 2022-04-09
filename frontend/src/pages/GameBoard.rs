@@ -5,8 +5,6 @@ use connect4_lib::games::*;
 use connect4_lib::io::*;
 use connect4_lib::play;
 use yew::{html, prelude::*, Children, Component, Html, Properties};
-use yew::{prelude::*, html, Children, Component, Html, Properties};
-use muicss_yew::input::Input;
 
 pub struct GameBoard {
     input_column: String,
@@ -15,6 +13,9 @@ pub struct GameBoard {
     internal_game: Game,
     turn: PlayerTurn, // This should be kept track of in the update function, so no check is needed in maketurn()
     ai: MyAi,
+    submitPlayerButtonDisabled: bool,
+    width: usize,
+    height: usize,
 }
 
 #[derive(Clone, Copy,PartialEq)]
@@ -35,6 +36,7 @@ pub enum GameBoardMsg {
     Update(String),
     Clear(String),
     SubmitTurn(u8),
+    SubmitPlayer,
     TestClick,
     DoNothing
 }
@@ -168,7 +170,7 @@ impl Component for GameBoard {
         let mut g_state = "".to_string();
         let width = 7;
         let height = 6;
-        for _ in 0..(width * height - 1) {
+        for _ in 0..(width * height) {
             g_state += "0";
         }
         let board = Board::new(width, height);
@@ -204,6 +206,7 @@ impl Component for GameBoard {
             ],
         };
 
+
         Self {
             input_column: "".to_string(),
             sample_text: "".to_string(),
@@ -211,6 +214,9 @@ impl Component for GameBoard {
             internal_game: Game::new(board, vec![player1, player2]),
             turn: PlayerTurn::Player1,
             ai: MyAi::Hard,
+            submitPlayerButtonDisabled: false,
+            width: 7,
+            height: 6,
         }
     }
 
@@ -219,13 +225,14 @@ impl Component for GameBoard {
             GameBoardMsg::Update(content) => {
                 // let mut x = content.as_string().unwrap();
                 self.input_column = self.input_column.clone() + &content;
+                return true;
             }
             GameBoardMsg::SubmitTurn(col) => {
                 
                 log::info!("Submitted column: {}", col);
 
-                let col = 5; //change to the input column
-                match self.make_turn(col) {
+                // let col = 5; //change to the input column
+                match self.make_turn(col as isize) {
                     BoardState::Ongoing => {
                         //valid move by the player, we can now end the current players turn
                         if self.ai == MyAi::Human { // if its humans then flip the users turn, if there is an AI, make_turn handles it
@@ -243,12 +250,19 @@ impl Component for GameBoard {
                         //player x has won
                     }
                 }
+                // print_state(&self.game_state, self.height, self.width);
+                return true;
             },
-            GameBoardMsg::Clear(_) => self.input_column = "".to_string(),
+            GameBoardMsg::Clear(_) => {return true;}
             GameBoardMsg::DoNothing => {},
             GameBoardMsg::TestClick => {log::info!("TestClick")},
+            GameBoardMsg::SubmitPlayer => {
+                self.submitPlayerButtonDisabled = true;
+                self.sample_text = "Current player: ".to_owned() + &self.input_column.clone();
+                return true;
+            },
         }
-        true
+        false
     }
 
     fn changed(&mut self, ctx: &Context<Self>) -> bool {
@@ -280,9 +294,16 @@ impl Component for GameBoard {
         let onclickTestClick=ctx.link().callback(|_event: MouseEvent| GameBoardMsg::TestClick);
 
         let game_state_table = render_table(&self.game_state, self.width, self.height, &ctx);
+        let mut game_table = html!{<></>};
+        if self.submitPlayerButtonDisabled { // if true, game has started
+            // log::info!("Game started");
+            game_table = render_table(&self.game_state, self.width, self.height, &ctx);
+        }
         
         html! { 
             <>
+            
+                <h5 class={"w3-xxxlarge w3-text-red"}><b>{"Enter Player Name"}</b></h5>
                 < input
                     type="text"
                     id="fname"
@@ -290,15 +311,14 @@ impl Component for GameBoard {
                     oninput={onkeypress}
                 />
                 <button
-                    onclick={ctx.link().callback(|_event: MouseEvent| GameBoardMsg::SubmitTurn(3))}
+                    onclick={ctx.link().callback(|_event: MouseEvent| GameBoardMsg::SubmitPlayer)}
                     hidden={self.submitPlayerButtonDisabled}
                 > {"Submit"} </button>
                 <p> {self.sample_text.clone()} </p>
 
-                {game_state_table}
+                {game_table}
                 
 
-                <h5 class={"w3-xxxlarge w3-text-red"}><b>{"Enter Player Names"}</b></h5>
             </>
         }
     }
@@ -335,7 +355,9 @@ fn render_table(gameState: &String, width: usize, height:usize, ctx:   &Context<
     for i in 0..height{
         let start = width*i;
         let end = width*(i+1) - 1;
-        let holder = &gameState[start..end];
+        // log::info!("start {}", start);
+        // log::info!("end {}", end);
+        let holder = &gameState[start..=end];
         game_rows.push(render_row(&holder, width, height, &ctx));
     }
     html! {
@@ -347,9 +369,22 @@ fn render_table(gameState: &String, width: usize, height:usize, ctx:   &Context<
 
 fn render_cell(gamepiece: char, ctx:   &Context<GameBoard>, column: u8) -> Html {
     // let turn_choice = *column;
+    if gamepiece == '1' {
+        return html! {
+            <td
+                onclick={ctx.link().callback(move |_event: MouseEvent| GameBoardMsg::SubmitTurn(column))}
+                class={"w3-container w3-red"}
+                >
+                <h2 >{gamepiece}</h2>
+            </td>
+        };
+    };
     html! {
-        <td onclick={ctx.link().callback(move |_event: MouseEvent| GameBoardMsg::SubmitTurn(column))}>
-            {gamepiece}
+        <td
+            onclick={ctx.link().callback(move |_event: MouseEvent| GameBoardMsg::SubmitTurn(column))}
+            class={"w3-container w3-green"}
+            >
+            <h2 >{gamepiece}</h2>
         </td>
     }
 }

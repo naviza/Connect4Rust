@@ -95,9 +95,9 @@ fn home() -> Html {
         <div>
             <h1>{ "Home" }</h1>
             <div class="block-display">
-                <button onclick={onclick_callback1}>{ "Instructions for Connect 4" }</button>
-                <button onclick={onclick_callback2}>{ "Play against a Human" }</button>
-                <button onclick={onclick_callback3}>{ "Play against a Computer" }</button>
+                <button onclick={onclick_callback1} class={"w3-button w3-blue w3-jumbo"}>{ "Instructions for Connect 4" }</button>
+                <button onclick={onclick_callback2} class={"w3-button w3-blue w3-jumbo"}>{ "Play against a Human" }</button>
+                <button onclick={onclick_callback3} class={"w3-button w3-blue w3-jumbo"}>{ "Play against a Computer" }</button>
             </div>
         </div>
     }
