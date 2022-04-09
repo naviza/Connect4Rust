@@ -1,4 +1,3 @@
-
 use connect4_lib::ai::*;
 use connect4_lib::game::*;
 use connect4_lib::games::*;
@@ -330,10 +329,7 @@ impl Component for GameBoard {
                     hidden={self.submitPlayerButtonDisabled}
                 > {"Submit"} </button>
                 <p> {self.sample_text.clone()} </p>
-
                 {game_table}
-                
-
             </>
         }
     }

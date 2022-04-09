@@ -14,7 +14,6 @@ impl Component for Connect4Instruction {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         log::info!("We are here now. Logging works");
-        
         html! { 
             <>
             
