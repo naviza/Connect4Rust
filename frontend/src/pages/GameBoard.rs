@@ -6,18 +6,23 @@ use connect4_lib::play;
 use yew::{html, prelude::*, Children, Component, Html, Properties};
 
 pub struct GameBoard {
-    input_column: String,
+    player1_name_input: String,
+    player2_name_input: String,
+    submitPlayer1ButtonDisabled: bool,
+    submitPlayer2ButtonDisabled: bool,
+
     sample_text: String,
     game_state: String,
     internal_game: Game,
     turn: PlayerTurn, // This should be kept track of in the update function, so no check is needed in maketurn()
     ai: MyAi,
-    submitPlayerButtonDisabled: bool,
     width: usize,
     height: usize,
+    game_type: GameType,
+    number_of_players: usize,
 }
 
-#[derive(Clone, Copy,PartialEq)]
+#[derive(Clone, Copy,PartialEq, Debug)]
 pub enum MyAi {
     Hard,
     Med,
@@ -32,12 +37,18 @@ pub enum PlayerTurn {
 }
 
 pub enum GameBoardMsg {
-    Update(String),
+    Player1NameUpdate(String),
+    Player2NameUpdate(String),
+    SubmitPlayer1,
+    SubmitPlayer2,
+
     Clear(String),
     SubmitTurn(u8),
-    SubmitPlayer,
     TestClick,
-    DoNothing
+    DoNothing,
+    IncreaseAIDifficulty,
+    DecreaseAIDifficulty,
+    
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -221,25 +232,35 @@ impl Component for GameBoard {
 
 
         Self {
-            input_column: "".to_string(),
+            player1_name_input: "".to_string(),
+            player2_name_input: "".to_string(),
+            submitPlayer1ButtonDisabled: false,
+            submitPlayer2ButtonDisabled: false,
+
             sample_text: "".to_string(),
             game_state: g_state,
             internal_game: Game::new(board, vec![player1, player2]),
             turn: PlayerTurn::Player1,
-            ai: MyAi::Hard,
-            submitPlayerButtonDisabled: false,
+            ai: MyAi::Med,
             width: 7,
             height: 6,
+            number_of_players: ctx.props().number_of_players,
+            game_type: ctx.props().game_type.clone()
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            GameBoardMsg::Update(content) => {
+            GameBoardMsg::Player1NameUpdate(content) => {
                 // let mut x = content.as_string().unwrap();
-                self.input_column = self.input_column.clone() + &content;
+                self.player1_name_input = self.player1_name_input.clone() + &content;
                 return true;
-            }
+            },
+            GameBoardMsg::Player2NameUpdate(content) => {
+                // let mut x = content.as_string().unwrap();
+                self.player2_name_input = self.player2_name_input.clone() + &content;
+                return true;
+            },
             GameBoardMsg::SubmitTurn(col) => {
                 
                 log::info!("Submitted column: {}", col);
@@ -269,10 +290,38 @@ impl Component for GameBoard {
             GameBoardMsg::Clear(_) => {return true;}
             GameBoardMsg::DoNothing => {},
             GameBoardMsg::TestClick => {log::info!("TestClick")},
-            GameBoardMsg::SubmitPlayer => {
-                self.submitPlayerButtonDisabled = true;
-                self.sample_text = "Current player: ".to_owned() + &self.input_column.clone();
+            GameBoardMsg::SubmitPlayer1 => {
+                log::info!("Submitted player 1: {}", self.player1_name_input.clone());
+                self.submitPlayer1ButtonDisabled = true;
+                // self.sample_text = "Current player: ".to_owned() + &self.player1_name_input.clone();
                 self.turn = PlayerTurn::Player1;
+                return true;
+            },
+            GameBoardMsg::SubmitPlayer2 => {
+                log::info!("Submitted player 2: {}", self.player2_name_input.clone());
+                self.submitPlayer2ButtonDisabled = true;
+                // self.sample_text = "Current player: ".to_owned() + &self.player1_name_input.clone();
+                // self.turn = PlayerTurn::Player1;
+                return true;
+            },
+            GameBoardMsg::IncreaseAIDifficulty => {
+                log::info!("Increasing AI difficulty");
+                match self.ai.clone() {
+                    MyAi::Easy => {self.ai = MyAi::Med},
+                    MyAi::Hard => {self.ai = MyAi::Hard},
+                    MyAi::Med => {self.ai = MyAi::Hard},
+                    MyAi::Human => {log::info!("Error. You shouldn't be changing AI difficulty with 2 players.")},
+                }
+                return true;
+            },
+            GameBoardMsg::DecreaseAIDifficulty => {
+                log::info!("Decreasing AI difficulty");
+                match self.ai.clone() {
+                    MyAi::Easy => {self.ai = MyAi::Easy},
+                    MyAi::Hard => {self.ai = MyAi::Med},
+                    MyAi::Med => {self.ai = MyAi::Easy},
+                    MyAi::Human => {log::info!("Error. You shouldn't be changing AI difficulty with 2 players.")},
+                }
                 return true;
             },
         }
@@ -289,45 +338,98 @@ impl Component for GameBoard {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
 
+        
+
         let onkeypress = ctx.link().callback(|event: InputEvent|{
             match event.data(){
-                Some(text) => GameBoardMsg::Update(text),
+                Some(text) => GameBoardMsg::Player1NameUpdate(text),
                 None => GameBoardMsg::DoNothing,
             }
         });
-        // let onkeypress = ctx.link().batch_callback(|e: KeyboardEvent| {
-        //     if e.key() == "Enter" {
-        //         // let input: InputEvent = e.target_unchecked_into();
-        //         // let value = input.data();
-        //         // input.set_value("");
-        //         // Some(Msg::Add(value))
-        //         // GameBoardMsg::Update("".to_string());
-        //     }
-        //     GameBoardMsg::Update("as".to_string())
-        // });
-        let onclickTestClick=ctx.link().callback(|_event: MouseEvent| GameBoardMsg::TestClick);
 
-        let game_state_table = render_table(&self.game_state, self.width, self.height, &ctx);
-        let mut game_table = html!{<></>};
-        if self.submitPlayerButtonDisabled { // if true, game has started
-            // log::info!("Game started");
-            game_table = render_table(&self.game_state, self.width, self.height, &ctx);
-        }
         
-        html! { 
+        let player1_input = html!{
             <>
-            
-                <h5 class={"w3-xxxlarge w3-text-red"}><b>{"Enter Player Name"}</b></h5>
-                < input
+                <input
                     type="text"
                     id="fname"
-                    value={self.input_column.clone()}
+                    placeholder="Player 1"
+                    disabled={self.submitPlayer1ButtonDisabled}
+                    value={self.player1_name_input.clone()}
                     oninput={onkeypress}
                 />
                 <button
-                    onclick={ctx.link().callback(|_event: MouseEvent| GameBoardMsg::SubmitPlayer)}
-                    hidden={self.submitPlayerButtonDisabled}
+                    onclick={ctx.link().callback(|_event: MouseEvent| GameBoardMsg::SubmitPlayer1)}
+                    hidden={self.submitPlayer1ButtonDisabled}
                 > {"Submit"} </button>
+            </>
+        };
+
+        let one_player_only = self.number_of_players == 1;
+        let mut secondary_input = html!{<></>};
+        if one_player_only { // if there's only 1 player, 2nd input is ai difficulty
+            let ai_string = match self.ai {
+                MyAi::Easy => "Easy",
+                MyAi::Hard => "Hard",
+                MyAi::Med => "Medium",
+                MyAi::Human => "Error",
+            };
+            log::info!("AI Difficulty: {:?}", self.ai);
+            secondary_input  = html!{
+                <>
+                    <button class="w3-button w3-circle w3-teal" disabled={self.submitPlayer1ButtonDisabled}
+                        onclick={ctx.link().callback(|_event: MouseEvent| GameBoardMsg::DecreaseAIDifficulty)}>{"-"}</button>
+                    {ai_string}
+                    <button class="w3-button w3-circle w3-teal" disabled={self.submitPlayer1ButtonDisabled}
+                        onclick={ctx.link().callback(|_event: MouseEvent| GameBoardMsg::IncreaseAIDifficulty)}>{"+"}</button>
+                    
+                </>
+            };
+        } else { // if 2 players, 2nd input is 2nd player
+            let onkeypress2 = ctx.link().callback(|event: InputEvent|{
+                match event.data(){
+                    Some(text) => GameBoardMsg::Player2NameUpdate(text),
+                    None => GameBoardMsg::DoNothing,
+                }
+            });
+            secondary_input  = html!{
+                <>
+                    <input
+                        type="text"
+                        id="2ndfname"
+                        placeholder="Player 2"
+                        disabled={self.submitPlayer2ButtonDisabled}
+                        value={self.player2_name_input.clone()}
+                        oninput={onkeypress2}
+                    />
+                    <button
+                        onclick={ctx.link().callback(|_event: MouseEvent| GameBoardMsg::SubmitPlayer2)}
+                        hidden={self.submitPlayer2ButtonDisabled}
+                    > {"Submit"} </button>
+                </>
+            };
+        }
+
+        let game_state_table = render_table(&self.game_state, self.width, self.height, &ctx);
+        let mut game_table = html!{<></>};
+        if one_player_only {
+            if self.submitPlayer1ButtonDisabled { // if true, game has started
+            // log::info!("Game started");
+                game_table = render_table(&self.game_state, self.width, self.height, &ctx);
+            }
+        } else {
+            if self.submitPlayer1ButtonDisabled && self.submitPlayer2ButtonDisabled { // if true, game has started
+                // log::info!("Game started");
+                game_table = render_table(&self.game_state, self.width, self.height, &ctx);
+            }
+        }
+
+        
+        html! { 
+            <>
+                <h5 class={"w3-text-red"}><b>{"Enter Player Name"}</b></h5>
+                {player1_input} <br />
+                {secondary_input}
                 <p> {self.sample_text.clone()} </p>
                 {game_table}
             </>
