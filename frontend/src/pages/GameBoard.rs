@@ -193,7 +193,7 @@ impl Component for GameBoard {
         let width = 7;
         let height = 6;
         for _ in 0..(width * height) {
-            g_state += "0";
+            g_state += "o";
         }
         let board = Board::new(width, height);
         let p1_chips = ChipDescrip {
@@ -291,6 +291,7 @@ impl Component for GameBoard {
             GameBoardMsg::DoNothing => {},
             GameBoardMsg::TestClick => {log::info!("TestClick")},
             GameBoardMsg::SubmitPlayer1 => {
+                log::info!("AI Difficulty: {:?}", self.ai);
                 log::info!("Submitted player 1: {}", self.player1_name_input.clone());
                 self.submitPlayer1ButtonDisabled = true;
                 // self.sample_text = "Current player: ".to_owned() + &self.player1_name_input.clone();
@@ -298,6 +299,7 @@ impl Component for GameBoard {
                 return true;
             },
             GameBoardMsg::SubmitPlayer2 => {
+                log::info!("AI Difficulty: {:?}", self.ai);
                 log::info!("Submitted player 2: {}", self.player2_name_input.clone());
                 self.submitPlayer2ButtonDisabled = true;
                 // self.sample_text = "Current player: ".to_owned() + &self.player1_name_input.clone();
@@ -305,7 +307,7 @@ impl Component for GameBoard {
                 return true;
             },
             GameBoardMsg::IncreaseAIDifficulty => {
-                log::info!("Increasing AI difficulty");
+                // log::info!("Increasing AI difficulty");
                 match self.ai.clone() {
                     MyAi::Easy => {self.ai = MyAi::Med},
                     MyAi::Hard => {self.ai = MyAi::Hard},
@@ -315,7 +317,7 @@ impl Component for GameBoard {
                 return true;
             },
             GameBoardMsg::DecreaseAIDifficulty => {
-                log::info!("Decreasing AI difficulty");
+                // log::info!("Decreasing AI difficulty");
                 match self.ai.clone() {
                     MyAi::Easy => {self.ai = MyAi::Easy},
                     MyAi::Hard => {self.ai = MyAi::Med},
@@ -374,7 +376,6 @@ impl Component for GameBoard {
                 MyAi::Med => "Medium",
                 MyAi::Human => "Error",
             };
-            log::info!("AI Difficulty: {:?}", self.ai);
             secondary_input  = html!{
                 <>
                     <button class="w3-button w3-circle w3-teal" disabled={self.submitPlayer1ButtonDisabled}
@@ -491,11 +492,19 @@ fn render_cell(gamepiece: char, ctx:   &Context<GameBoard>, column: u8) -> Html 
                 <h2 >{gamepiece}</h2>
             </td>
         };
+    }
+    let cell_style = match gamepiece{
+        '0' => "w3-container w3-white",
+        '1' => "w3-container w3-red",
+        '2' => "w3-container w3-yellow",
+        't' => "w3-container w3-red",
+        'o' => "w3-container w3-yellow",
+        _ => "w3-container w3-black"
     };
     html! {
         <td
             onclick={ctx.link().callback(move |_event: MouseEvent| GameBoardMsg::SubmitTurn(column))}
-            class={"w3-container w3-green"}
+            class={cell_style}
             >
             <h2 >{gamepiece}</h2>
         </td>

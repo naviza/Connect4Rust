@@ -10,6 +10,8 @@ use crate::pages::Connect4Computer::Connect4Computer;
 use crate::pages::TootOttoInstruction::TootOttoInstruction;
 use crate::pages::GameBoard::GameBoard;
 use crate::pages::GameBoard::GameType;
+use crate::pages::ScoreBoard::ScoreBoard;
+use crate::pages::GameHistory::GameHistory;
 
 #[derive(Debug, Clone, Copy, PartialEq, Routable)]
 enum Route {
@@ -32,6 +34,11 @@ enum Route {
     #[not_found]
     #[at("/404")]
     NotFound,
+    
+    #[at("/GameHistory")]
+    GameHistory,
+    #[at("/ScoreBoard")]
+    ScoreBoard,
 }
 
 
@@ -102,7 +109,6 @@ fn c4_against_human() -> Html {
 fn c4_against_computer() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
-
     html! {
         <div>
         <h1>{ "Connect4 1 player" }</h1>
@@ -127,6 +133,32 @@ fn instructions() -> Html {
     }
 }
 
+#[function_component(GameHistoryMain)]
+fn game_history_main() -> Html {
+
+    let history = use_history().unwrap();
+    let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
+    html! {
+        <div>
+        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
+        <GameHistory />
+        </div>
+    }
+}
+
+#[function_component(ScoreBoardMain)]
+fn score_board_main() -> Html {
+
+    let history = use_history().unwrap();
+    let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
+    html! {
+        <div>
+        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
+        <ScoreBoard />
+        </div>
+    }
+}
+
 #[function_component(Home)]
 fn home() -> Html {
     let mut history = use_history().unwrap();
@@ -146,6 +178,11 @@ fn home() -> Html {
     history = use_history().unwrap().clone();
     let onclick_callback_tcomp = Callback::from(move |_| history.push(Route::TootOttoComputer));
 
+    history = use_history().unwrap().clone();
+    let onclick_callback_game_history = Callback::from(move |_| history.push(Route::GameHistory));
+    history = use_history().unwrap().clone();
+    let onclick_callback_score_board = Callback::from(move |_| history.push(Route::ScoreBoard));
+
 
     html! {
         <div>
@@ -160,6 +197,9 @@ fn home() -> Html {
                 <button onclick={onclick_callback_tinstr} class={"w3-bar-item w3-button w3-red"}>{ "Instructions for Toot-Otto" }</button>
                 <button onclick={onclick_callback_thuman} class={"w3-bar-item w3-button w3-red"}>{ "Play against a Human" }</button>
                 <button onclick={onclick_callback_tcomp} class={"w3-bar-item w3-button w3-red"}>{ "Play against a Computer" }</button>
+
+                <button onclick={onclick_callback_game_history} class={"w3-bar-item w3-button w3-green"}>{ "View Game History" }</button>
+                <button onclick={onclick_callback_score_board} class={"w3-bar-item w3-button w3-green"}>{ "Score Board" }</button>
             </div>
         </div>
     }
@@ -201,6 +241,12 @@ fn switch(routes: &Route) -> Html {
             <TootOttoComputer />
         },
         Route::NotFound => html! { <h1>{ "404" }</h1> },
+        Route::GameHistory => html! {
+            <GameHistoryMain />
+        },
+        Route::ScoreBoard => html! {
+            <ScoreBoardMain />
+        },
     }
 }
 
