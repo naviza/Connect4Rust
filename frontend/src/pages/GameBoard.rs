@@ -73,120 +73,128 @@ impl PlayerTurn {
 }
 
 impl GameBoard {
-    fn find_i(state: &mut Vec<char>, col: isize, w: isize, index: isize, player: char) -> i32 {
-        if (index as usize) >= state.len() {
-            return -1;
-        }
-        let my_col: isize = (index + 1) % w;
-        //last index before going to the next row
-        if my_col == col {
-            if state[index as usize] == 'o' {
-                if GameBoard::find_i(state, col, w, index + w, player) == -1 {
-                    state[index as usize] = player;
-                    return 0;
-                } else {
-                    return 0;
+    fn find(&mut self, col: usize, player: &str) -> String {
+            log::info!(" FIND FUNCTION");
+            let mut state = self.game_state.clone();
+            let temp = state.as_bytes();
+            let mut v: Vec<u8> = vec![];
+            for i in 0..self.height {
+                let ind = i * self.width + col;
+                log::info!(" temp[ind] = {}", temp[ind]);
+                v.push(temp[ind]);
+            }
+            let mut index = self.height + 1;
+            for i in (0..v.len()).rev() {
+                if v[i] == 111 {
+                    //byte for o
+                    //first index to have o in it, so the bottom
+                    index = i;
+                    break;
                 }
+            }
+            if self.height + 1 == index {
+                //no empty spot in this column
+                //internal game should take care of this
             } else {
-                //change the pervious state of it
-                state[(index - w) as usize] = player;
-                return 0;
+                let ind = index * self.width + col;
+    
+                state.replace_range(ind..ind+1, player);
             }
-        } else {
-            GameBoard::find_i(state, col, w, index + 1, player)
+            state
         }
-    }
-
-    fn make_ai_turn(&mut self) -> BoardState {
-        let board = self.internal_game.get_board().clone();
-        let chip_descrip = self.internal_game.current_player().chip_options[0];
-
-        let mut col = 0;
-
-        match self.ai.clone() {
-            MyAi::Easy => {
-                (col, _) = get_best_move(&mut self.internal_game, EASY_AI);
+    
+        fn make_ai_turn(&mut self) -> BoardState {
+            log::info!("MADE IT TO AI TURN");
+            let mut chip = ChipDescrip {
+                bg_color: 60,
+                fg_color: 5,
+                graphic: '◼',
+            };
+            let mut col = 0;
+            log::info!("MADE IT past");
+            match self.ai.clone() {
+                MyAi::Easy => {
+                    log::info!("HERE I AM - easy");
+                    (_, col, chip) = evaluate_board(&mut self.internal_game, EASY_AI);
+                    log::info!("HERE I AM - easy");
+                }
+                MyAi::Med => {
+                    log::info!("HERE I AM - med");
+                    (_, col, chip) = evaluate_board(&mut self.internal_game, MID_AI);
+                }
+                MyAi::Hard => {
+                    log::info!("HERE I AM - hard");
+                    (_, col, chip) = evaluate_board(&mut self.internal_game, HARD_AI);
+                }
+                _ => {
+                    //should never be human
+                }
             }
-            MyAi::Med => {
-                (col, _) = get_best_move(&mut self.internal_game, MID_AI);
-            }
-            MyAi::Hard => {
-                (col, _) = get_best_move(&mut self.internal_game, HARD_AI);
-            }
-            _ => {
-                //should never be human
+    
+            // make the play
+            log::info!("col = {}", col);
+            let state = self.internal_game.play(col, chip);
+    
+            match state {
+                BoardState::Ongoing => {
+                    self.game_state = self.find(col as usize, "2");
+                    log::info!("game state from ai turn = {}", self.game_state);
+                    state
+                }
+    
+                //if its either someone wins, draws, or invalid, and the function that called this will handle it
+                _ => state,
             }
         }
-
-        // make the play
-        let state = self.internal_game.play(col, chip_descrip);
-
-        match state {
-            BoardState::Ongoing => {
-                let w = self.internal_game.get_board().width();
-                let mut gstate: Vec<char> = self.game_state.chars().collect();
-                GameBoard::find_i(&mut gstate, col, w.try_into().unwrap(), 0, '2');
-                self.game_state = gstate.into_iter().collect();
-                state
-            }
-
-            //if its either someone wins, draws, or invalid, and the function that called this will handle it
-            _ => state,
-        }
-    }
-
-    pub fn make_turn(&mut self, col: isize) -> BoardState {
-        let ai = self.ai.clone();
-        match ai {
-            MyAi::Human => self.make_turn_helper(col),
-            _ => {
-                // any difficulty for the AI
-                let state = self.make_turn_helper(col).clone(); // does the humans turn
-                match state {
-                    BoardState::Ongoing => {
-                        // player 1's turn was good, the AI can make his move now
-                        self.make_ai_turn()
+    
+        pub fn make_turn(&mut self, col: usize) -> BoardState {
+            let ai = self.ai.clone();
+            log::info!("Make turn");
+            match ai {
+                MyAi::Human => self.make_turn_helper(col),
+                _ => {
+                    log::info!("AI FOUND");
+                    // any difficulty for the AI
+                    let state = self.make_turn_helper(col).clone(); // does the humans turn
+                    match state {
+                        BoardState::Ongoing => {
+                            // player 1's turn was good, the AI can make his move now
+                            log::info!("The user made a good move!");
+                            self.make_ai_turn()
+                        }
+    
+                        _ => state, //player 1's turn was not good, let the update function handle it
                     }
-
-                    _ => state, //player 1's turn was not good, let the update function handle it
                 }
             }
         }
-    }
-
-    pub fn make_turn_helper(&mut self, col: isize) -> BoardState {
-        let board = self.internal_game.get_board().clone();
-        let chip_descrip = self.internal_game.current_player().chip_options[0];
-
-        // make the play
-        let state = self.internal_game.play(col, chip_descrip);
-        match state {
-            BoardState::Ongoing => {
-                let w = self.internal_game.get_board().width();
-                
-                
-                let mut gstate: Vec<char> = self.game_state.chars().collect();
-                GameBoard::find_i(
-                    &mut gstate,
-                    col,
-                    w.try_into().unwrap(),
-                    0,
-                    match self.turn {
-                        PlayerTurn::Player1 => '1',
-                        PlayerTurn::Player2 => '2',
-                    },
-                );
-                self.game_state = gstate.into_iter().collect();
-                log::info!("INSIDE MAKE TURN HELPER");
-                print_state(&self.game_state, self.height, self.width);
-                state
+    
+        fn make_turn_helper(&mut self, col: usize) -> BoardState {
+            log::info!("Make turn helper");
+            let chip_descrip = self.internal_game.current_player().chip_options[0];
+    
+            // make the play
+            let state = self.internal_game.play(col as isize, chip_descrip);
+            match state {
+                BoardState::Ongoing => {
+                    log::info!("Good Move!");
+                    log::info!("Finding i ...");
+                    self.game_state = self.find(
+                        col,
+                        match self.turn {
+                            PlayerTurn::Player1 => "1",
+                            PlayerTurn::Player2 => "2",
+                        },
+                    );
+                    print_state(&self.game_state, self.height, self.width);
+                    state
+                }
+    
+                //if its either someone wins, draws, or invalid, and the function that called this will handle it
+                _ => state,
             }
-
-            //if its either someone wins, draws, or invalid, and the function that called this will handle it
-            _ => state,
         }
     }
-}
 
 impl Component for GameBoard {
     type Message = GameBoardMsg;
@@ -194,8 +202,8 @@ impl Component for GameBoard {
 
     fn create(ctx: &Context<Self>) -> Self {
         let mut g_state = "".to_string();
-        let width = 7;
-        let height = 6;
+        let width : isize = 7;
+        let height : isize = 6;
         for _ in 0..(width * height) {
             g_state += "o";
         }
@@ -210,31 +218,32 @@ impl Component for GameBoard {
             fg_color: 5,
             graphic: '◼',
         };
-
+        let co1 = four_in_a_row(p1_chips);
+        let co2 = four_in_a_row(p2_chips);
         let player1 = Player {
             player_type: PlayerType::Local,
-            chip_options: vec![p1_chips],
+            chip_options: co1.clone(),
             win_conditions: vec![
-                vec![p1_chips],
-                vec![p1_chips],
-                vec![p1_chips],
-                vec![p1_chips],
+                co1.clone(),
+                co1.clone(),
+                co1.clone(),
+                co1.clone(),
             ],
         };
         let player2 = Player {
             player_type: PlayerType::AI(HARD_AI),
-            chip_options: vec![p2_chips],
+            chip_options: co2.clone(),
             win_conditions: vec![
-                vec![p2_chips],
-                vec![p2_chips],
-                vec![p2_chips],
-                vec![p2_chips],
+                co2.clone(),
+                co2.clone(),
+                co2.clone(),
+                co2.clone(),
             ],
         };
 
         log::info!("Started: {:?} with {} player(s).", ctx.props().game_type, ctx.props().number_of_players);
 
-
+        let ai = if ctx.props().number_of_players == 2{ MyAi::Human} else {MyAi::Med};
         Self {
             player1_name_input: "".to_string(),
             player2_name_input: "".to_string(),
@@ -245,9 +254,9 @@ impl Component for GameBoard {
             game_state: g_state,
             internal_game: Game::new(board, vec![player1, player2]),
             turn: PlayerTurn::Player1,
-            ai: MyAi::Med,
-            width: 7,
-            height: 6,
+            ai: ai,
+            width: width as usize,
+            height: height as usize,
             number_of_players: ctx.props().number_of_players,
             game_type: ctx.props().game_type.clone()
         }
@@ -271,7 +280,7 @@ impl Component for GameBoard {
                 log::info!("Submitted column: {}", col);
 
                 // let col = 5; //change to the input column
-                match self.make_turn(col as isize) {
+                match self.make_turn(col as usize) {
                     BoardState::Ongoing => {
                         //valid move by the player, we can now end the current players turn
                         if self.ai == MyAi::Human { // if its humans then flip the users turn, if there is an AI, make_turn handles it
@@ -289,6 +298,7 @@ impl Component for GameBoard {
                     BoardState::Win(x) => {
                         //player x has won
                         //the game is a draw --> send the game info to the database
+                        log::info!("Player {} has won the game!", x);
                     }
                 }
                 // print_state(&self.game_state, self.height, self.width);
@@ -505,7 +515,7 @@ fn render_cell(gamepiece: char, ctx:   &Context<GameBoard>, column: u8) -> Html 
         '1' => "w3-container w3-red",
         '2' => "w3-container w3-yellow",
         't' => "w3-container w3-red",
-        'o' => "w3-container w3-yellow",
+        'o' => "w3-container w3-white",
         _ => "w3-container w3-black"
     };
     html! {
