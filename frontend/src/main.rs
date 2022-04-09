@@ -1,6 +1,7 @@
 use yew::functional::*;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use log::log;
 
 mod pages;
 

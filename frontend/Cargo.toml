@@ -9,7 +9,13 @@ edition = "2021"
 yew = "0.19"
 yew-router = "*"
 gloo = "*"
+gloo-utils="*"
 #wasm_bindgen = "*"
 #yew_functional = "*"
 wasm-logger = "0.2.0"
 log = "*"
+yew_styles = { version="0.11", features=["button", "text", "navbar"] }
+stylist = "0.10"
+
+
+muicss-yew = { git = "https://github.com/AlephAlpha/muicss-yew" }
