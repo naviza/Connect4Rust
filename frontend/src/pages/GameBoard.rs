@@ -80,7 +80,7 @@ impl GameBoard {
         let my_col: isize = (index + 1) % w;
         //last index before going to the next row
         if my_col == col {
-            if state[index as usize] == '0' {
+            if state[index as usize] == 'o' {
                 if GameBoard::find_i(state, col, w, index + w, player) == -1 {
                     state[index as usize] = player;
                     return 0;
@@ -163,6 +163,8 @@ impl GameBoard {
         match state {
             BoardState::Ongoing => {
                 let w = self.internal_game.get_board().width();
+                
+                
                 let mut gstate: Vec<char> = self.game_state.chars().collect();
                 GameBoard::find_i(
                     &mut gstate,
@@ -175,6 +177,8 @@ impl GameBoard {
                     },
                 );
                 self.game_state = gstate.into_iter().collect();
+                log::info!("INSIDE MAKE TURN HELPER");
+                print_state(&self.game_state, self.height, self.width);
                 state
             }
 
@@ -262,6 +266,7 @@ impl Component for GameBoard {
                 return true;
             },
             GameBoardMsg::SubmitTurn(col) => {
+                print_state(&self.game_state, self.height, self.width);
                 
                 log::info!("Submitted column: {}", col);
 
@@ -276,12 +281,14 @@ impl Component for GameBoard {
                     }
                     BoardState::Invalid => {
                         //invalid move by current player
+                        log::info!("The player made an invalid move.");
                     }
                     BoardState::Draw => {
-                        //the game is a draw
+                        //the game is a draw --> send the game info to the database
                     }
                     BoardState::Win(x) => {
                         //player x has won
+                        //the game is a draw --> send the game info to the database
                     }
                 }
                 // print_state(&self.game_state, self.height, self.width);
@@ -444,7 +451,7 @@ fn print_state(gameState: &String, height: usize, width: usize) -> () {
         let start = width*i;
         let end = width*(i+1) - 1;
         let holder = &gameState[start..end];
-        state_holder += &gameState[start..end];
+        state_holder += &gameState[start..=end];
         state_holder += "\n";
     }
     log::info!("{}", state_holder);
