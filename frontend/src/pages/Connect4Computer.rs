@@ -1,5 +1,6 @@
 use yew::{prelude::*, html, Children, Component, Html, Properties};
 use crate::pages::GameBoard::GameBoard;
+use crate::pages::GameBoard::GameType;
 
 pub struct Connect4Computer;
 
@@ -27,10 +28,8 @@ impl Component for Connect4Computer {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! { 
             <>
-                <GameBoard />
+                // <GameBoard game_type={GameType::ConnectFour} number_of_players=1 />
             </>
         }
     }
-
-    
 }

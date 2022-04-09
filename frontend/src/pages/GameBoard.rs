@@ -41,6 +41,18 @@ pub enum GameBoardMsg {
     DoNothing
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum GameType {
+    TooTOttO,
+    Connect4
+}
+
+#[derive(Clone, PartialEq, Properties)]
+pub struct GameBoardProps {
+    pub game_type: GameType,
+    pub number_of_players: usize,
+}
+
 impl PlayerTurn {
     pub fn flip(mut self) -> Self{
         match self {
@@ -164,9 +176,9 @@ impl GameBoard {
 
 impl Component for GameBoard {
     type Message = GameBoardMsg;
-    type Properties = ();
+    type Properties = GameBoardProps;
 
-    fn create(_ctx: &Context<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         let mut g_state = "".to_string();
         let width = 7;
         let height = 6;
@@ -205,6 +217,8 @@ impl Component for GameBoard {
                 vec![p2_chips],
             ],
         };
+
+        log::info!("Started: {:?} with {} player(s).", ctx.props().game_type, ctx.props().number_of_players);
 
 
         Self {
@@ -259,6 +273,7 @@ impl Component for GameBoard {
             GameBoardMsg::SubmitPlayer => {
                 self.submitPlayerButtonDisabled = true;
                 self.sample_text = "Current player: ".to_owned() + &self.input_column.clone();
+                self.turn = PlayerTurn::Player1;
                 return true;
             },
         }

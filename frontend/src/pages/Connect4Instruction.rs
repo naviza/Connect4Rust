@@ -14,8 +14,10 @@ impl Component for Connect4Instruction {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         log::info!("We are here now. Logging works");
+        
         html! { 
             <>
+            
             <p> {"Connect Four is a two-player connection game in which the players take turns dropping colored discs from "} <br/>
                     {"the top into a seven-column, six-row vertically suspended grid. The objective of the game is to be the "} <br/>
                     {"first to form a horizontal, vertical, or diagonal line of four of one's own discs."}
