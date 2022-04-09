@@ -45,3 +45,4 @@ impl Component for Connect4Instruction {
 
     fn destroy(&mut self, ctx: &Context<Self>) {}
 }
+

@@ -1,9 +1,12 @@
+
 use connect4_lib::ai::*;
 use connect4_lib::game::*;
 use connect4_lib::games::*;
 use connect4_lib::io::*;
 use connect4_lib::play;
 use yew::{html, prelude::*, Children, Component, Html, Properties};
+use yew::{prelude::*, html, Children, Component, Html, Properties};
+use muicss_yew::input::Input;
 
 pub struct GameBoard {
     input_column: String,
@@ -31,7 +34,9 @@ pub enum PlayerTurn {
 pub enum GameBoardMsg {
     Update(String),
     Clear(String),
-    SubmitTurn,
+    SubmitTurn(u8),
+    TestClick,
+    DoNothing
 }
 
 impl PlayerTurn {
@@ -215,13 +220,9 @@ impl Component for GameBoard {
                 // let mut x = content.as_string().unwrap();
                 self.input_column = self.input_column.clone() + &content;
             }
-            GameBoardMsg::SubmitTurn => {
-                if self.sample_text == "Richmond".to_string() {
-                    self.sample_text = "RICHMOND".to_string();
-                } else {
-                    self.sample_text = "Richmond".to_string();
-                }
-                self.input_column = self.input_column.to_uppercase();
+            GameBoardMsg::SubmitTurn(col) => {
+                
+                log::info!("Submitted column: {}", col);
 
                 let col = 5; //change to the input column
                 match self.make_turn(col) {
@@ -242,8 +243,10 @@ impl Component for GameBoard {
                         //player x has won
                     }
                 }
-            }
+            },
             GameBoardMsg::Clear(_) => self.input_column = "".to_string(),
+            GameBoardMsg::DoNothing => {},
+            GameBoardMsg::TestClick => {log::info!("TestClick")},
         }
         true
     }
@@ -257,14 +260,12 @@ impl Component for GameBoard {
     fn destroy(&mut self, ctx: &Context<Self>) {}
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let onkeypress = ctx.link().callback(|event: InputEvent| {
-            if event.input_type() == "insertText" {
-                // GameBoardMsg::Update(event.data().unwrap());
-                GameBoardMsg::Update(event.data().unwrap());
-            } else if event.input_type() == "deleteContent" {
-                GameBoardMsg::Clear(event.data().unwrap());
+
+        let onkeypress = ctx.link().callback(|event: InputEvent|{
+            match event.data(){
+                Some(text) => GameBoardMsg::Update(text),
+                None => GameBoardMsg::DoNothing,
             }
-            GameBoardMsg::Update(event.data().unwrap())
         });
         // let onkeypress = ctx.link().batch_callback(|e: KeyboardEvent| {
         //     if e.key() == "Enter" {
@@ -276,23 +277,79 @@ impl Component for GameBoard {
         //     }
         //     GameBoardMsg::Update("as".to_string())
         // });
+        let onclickTestClick=ctx.link().callback(|_event: MouseEvent| GameBoardMsg::TestClick);
 
-        html! {
+        let game_state_table = render_table(&self.game_state, self.width, self.height, &ctx);
+        
+        html! { 
             <>
                 < input
                     type="text"
                     id="fname"
                     value={self.input_column.clone()}
-                    // oninput={ctx.link().callback(|event: InputEvent| GameBoardMsg::Update(event))}
                     oninput={onkeypress}
-
-                    />
-                    <button onclick={ctx.link().callback(|event: MouseEvent| GameBoardMsg::SubmitTurn)}>
-                    //      ^^^^^^^ event listener name
-                        { "Click me!" }
-                    </button>
+                />
+                <button
+                    onclick={ctx.link().callback(|_event: MouseEvent| GameBoardMsg::SubmitTurn(3))}
+                    hidden={self.submitPlayerButtonDisabled}
+                > {"Submit"} </button>
                 <p> {self.sample_text.clone()} </p>
+
+                {game_state_table}
+                
+
+                <h5 class={"w3-xxxlarge w3-text-red"}><b>{"Enter Player Names"}</b></h5>
             </>
         }
+    }
+}
+
+fn print_state(gameState: &String, height: usize, width: usize) -> () {
+    let mut state_holder = "\n".to_string();
+    for i in 0..height{
+        let start = width*i;
+        let end = width*(i+1) - 1;
+        let holder = &gameState[start..end];
+        state_holder += &gameState[start..end];
+        state_holder += "\n";
+    }
+    log::info!("{}", state_holder);
+}
+
+fn render_row(gameRow: &str, width: usize, height:usize, ctx:   &Context<GameBoard>) -> Html {
+    let mut vec_holder = Vec::new();
+    let my_vec: Vec<char> = gameRow.chars().collect();
+    for i in 0..my_vec.len(){
+        let column_choice = i as u8;
+        vec_holder.push(render_cell(my_vec[i], ctx, column_choice));
+    }
+    html! {
+        <tr>
+            {vec_holder}
+        </tr>
+    }
+}
+
+fn render_table(gameState: &String, width: usize, height:usize, ctx:   &Context<GameBoard>) -> Html {
+    let mut game_rows = Vec::new();
+    for i in 0..height{
+        let start = width*i;
+        let end = width*(i+1) - 1;
+        let holder = &gameState[start..end];
+        game_rows.push(render_row(&holder, width, height, &ctx));
+    }
+    html! {
+        <table border={"1"}>
+                {game_rows}
+        </table>
+    }
+}
+
+fn render_cell(gamepiece: char, ctx:   &Context<GameBoard>, column: u8) -> Html {
+    // let turn_choice = *column;
+    html! {
+        <td onclick={ctx.link().callback(move |_event: MouseEvent| GameBoardMsg::SubmitTurn(column))}>
+            {gamepiece}
+        </td>
     }
 }
