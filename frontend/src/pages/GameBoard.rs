@@ -20,6 +20,8 @@ pub struct GameBoard {
     height: usize,
     game_type: GameType,
     number_of_players: usize,
+    game_is_done: bool,
+    winner_name: String,
 }
 
 #[derive(Clone, Copy,PartialEq, Debug)]
@@ -258,7 +260,9 @@ impl Component for GameBoard {
             width: width as usize,
             height: height as usize,
             number_of_players: ctx.props().number_of_players,
-            game_type: ctx.props().game_type.clone()
+            game_type: ctx.props().game_type.clone(),
+            game_is_done: false,
+            winner_name: "".to_string(),
         }
     }
 
@@ -298,6 +302,13 @@ impl Component for GameBoard {
                     BoardState::Win(x) => {
                         //player x has won
                         //the game is a draw --> send the game info to the database
+                        self.game_is_done = true;
+                        self.winner_name = match x{
+                            1 => self.player1_name_input.clone(),
+                            2 => self.player2_name_input.clone(),
+                            _ => "Error".to_string(),
+
+                        };
                         log::info!("Player {} has won the game!", x);
                     }
                 }
@@ -442,10 +453,19 @@ impl Component for GameBoard {
             }
         }
 
+        if self.game_is_done {
+            return html! {
+                <>
+                    <h5 class={"w3-text-red"}>{format!("The winner is: {}", self.winner_name.clone())}</h5>
+                    <a href={"/"}>{"Click here to go back to the home menu"}</a>
+                </>
+            }
+        };
+
         
         html! { 
             <>
-                <h5 class={"w3-text-red"}><b>{"Enter Player Name"}</b></h5>
+                <h5 class={"w3-text-blue"}><b>{"Enter Player Name"}</b></h5>
                 {player1_input} <br />
                 {secondary_input}
                 <p> {self.sample_text.clone()} </p>
@@ -516,7 +536,7 @@ fn render_cell(gamepiece: char, ctx:   &Context<GameBoard>, column: u8) -> Html 
         '2' => "w3-container w3-yellow",
         't' => "w3-container w3-red",
         'o' => "w3-container w3-white",
-        _ => "w3-container w3-black"
+        _ => "w3-container w3-white"
     };
     html! {
         <td
