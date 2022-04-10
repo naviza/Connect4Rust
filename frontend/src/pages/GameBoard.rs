@@ -475,7 +475,7 @@ impl Component for GameBoard {
     }
 }
 
-fn print_state(gameState: &String, height: usize, width: usize) -> () {
+pub fn print_state(gameState: &String, height: usize, width: usize) -> () {
     let mut state_holder = "\n".to_string();
     for i in 0..height{
         let start = width*i;
@@ -501,7 +501,7 @@ fn render_row(gameRow: &str, width: usize, height:usize, ctx:   &Context<GameBoa
     }
 }
 
-fn render_table(gameState: &String, width: usize, height:usize, ctx:   &Context<GameBoard>) -> Html {
+pub fn render_table(gameState: &String, width: usize, height:usize, ctx:   &Context<GameBoard>) -> Html {
     let mut game_rows = Vec::new();
     for i in 0..height{
         let start = width*i;
