@@ -50,10 +50,11 @@ fn toot_otto_instructions() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
     html! {
-        <div>
+        <div class="w3-panel w3-padding-64" style="padding-left: 80px">
         <h1>{ "Toot-Otto Instructions" }</h1>
-        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
         <TootOttoInstruction />
+        <br/ ><br/ >
+        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
         </div>
     }
 }
@@ -63,22 +64,24 @@ fn toot_otto_against_human() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
     html!{
-    <>
+        <div class="w3-panel w3-padding-64" style="padding-left: 80px">
         <h1>{ "Toot-Otto 2 Players" }</h1>
-        <button onclick={onclick_callback1}>{ "Go Home" }</button>
         <TooTGameBoard game_type={TooTGameType::TooTOttO} number_of_players=2 />
-    </>}
+        <br/ ><br/ >
+        <button onclick={onclick_callback1}>{ "Go Home" }</button>
+    </div>}
 }
 
 #[function_component(TootOttoComputer)]
 fn toot_otto_against_computer() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
-    html!{<>
+    html!{<div class="w3-panel w3-padding-64" style="padding-left: 80px">
         <h1>{ "Toot-Otto 1 Player" }</h1>
-        <button onclick={onclick_callback1}>{ "Go Home" }</button>
         <TooTGameBoard game_type={TooTGameType::TooTOttO} number_of_players=1 />
-    </>}
+        <br/ ><br/ >
+        <button onclick={onclick_callback1}>{ "Go Home" }</button>
+    </div>}
 }
 
 #[function_component(Secure)]
@@ -99,10 +102,11 @@ fn c4_against_human() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
     html! {
-        <div>
+        <div class="w3-panel w3-padding-64" style="padding-left: 80px">
         <h1>{ "Connect4 2 players" }</h1>
-        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
         <GameBoard game_type={GameType::Connect4} number_of_players=2 />
+        <br/ ><br/ >
+        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
         </div>
     }
 }
@@ -112,11 +116,12 @@ fn c4_against_computer() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
     html! {
-        <div>
+        <div class="w3-panel w3-padding-64" style="padding-left: 80px">
         <h1>{ "Connect4 1 player" }</h1>
-        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
         <br /><br />
         <GameBoard game_type={GameType::Connect4} number_of_players=1 />
+        <br/ ><br/ >
+        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
         </div>
     }
 }
@@ -127,10 +132,11 @@ fn instructions() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
     html! {
-        <div>
-        <h1>{ "Connect4 Instructions" }</h1>
-        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
-        <Connect4Instruction />
+        <div class="w3-panel w3-padding-64" style="padding-left: 80px">
+            <h1 >{ "Connect4 Instructions" }</h1>
+            <Connect4Instruction />
+            <br/ ><br/ >
+            <button onclick={onclick_callback1}>{ "Go to Home" }</button>
         </div>
     }
 }
@@ -141,9 +147,10 @@ fn game_history_main() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
     html! {
-        <div>
-        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
+        <div class="w3-panel w3-padding-64" style="padding-left: 80px">
         <GameHistory />
+        <br/ ><br/ >
+        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
         </div>
     }
 }
@@ -154,9 +161,10 @@ fn score_board_main() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
     html! {
-        <div>
-        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
+        <div class="w3-panel w3-padding-64" style="padding-left: 80px">
         <ScoreBoard />
+        <br/ ><br/ >
+        <button onclick={onclick_callback1}>{ "Go to Home" }</button>
         </div>
     }
 }
@@ -187,21 +195,21 @@ fn home() -> Html {
 
 
     html! {
-        <div>
-            <h1>{ "Home" }</h1>
+        <div class="w3-padding-32">
+            <h1 class="w3-container w3-center" style="font-size:60px;">{ "Home" }</h1>
             
             // <div class="block-display">
-            <div class="w3-sidebar w3-bar-block" style="width:25%">
-                <button onclick={onclick_callback1} class={"w3-bar-item w3-button w3-blue"}>{ "Instructions for Connect 4" }</button>
-                <button onclick={onclick_callback2} class={"w3-bar-item w3-button w3-blue"}>{ "Play against a Human" }</button>
-                <button onclick={onclick_callback3} class={"w3-bar-item w3-button w3-blue"}>{ "Play against a Computer" }</button>
+            <div class="center">
+                <button onclick={onclick_callback1} class={"w3-xxlarge w3-button w3-blue w3-block"}>{ "Instructions for Connect 4" }</button>
+                <button onclick={onclick_callback2} class={"w3-xxlarge w3-button w3-blue w3-block"}>{ "Play against a Human" }</button>
+                <button onclick={onclick_callback3} class={"w3-xxlarge w3-button w3-blue w3-block"}>{ "Play against a Computer" }</button>
 
-                <button onclick={onclick_callback_tinstr} class={"w3-bar-item w3-button w3-red"}>{ "Instructions for Toot-Otto" }</button>
-                <button onclick={onclick_callback_thuman} class={"w3-bar-item w3-button w3-red"}>{ "Play against a Human" }</button>
-                <button onclick={onclick_callback_tcomp} class={"w3-bar-item w3-button w3-red"}>{ "Play against a Computer" }</button>
+                <button onclick={onclick_callback_tinstr} class={"w3-xxlarge w3-button w3-red w3-block"}>{ "Instructions for Toot-Otto" }</button>
+                <button onclick={onclick_callback_thuman} class={"w3-xxlarge w3-button w3-red w3-block"}>{ "Play against a Human" }</button>
+                <button onclick={onclick_callback_tcomp} class={"w3-xxlarge w3-button w3-red w3-block"}>{ "Play against a Computer" }</button>
 
-                <button onclick={onclick_callback_game_history} class={"w3-bar-item w3-button w3-green"}>{ "View Game History" }</button>
-                <button onclick={onclick_callback_score_board} class={"w3-bar-item w3-button w3-green"}>{ "Score Board" }</button>
+                <button onclick={onclick_callback_game_history} class={"w3-xxlarge w3-button w3-green w3-block"}>{ "View Game History" }</button>
+                <button onclick={onclick_callback_score_board} class={"w3-xxlarge w3-button w3-green w3-block"}>{ "Score Board" }</button>
             </div>
         </div>
     }

@@ -565,10 +565,15 @@ impl Component for GameBoard {
             }
         }
         if self.game_is_done {
+            let restart_string = match self.number_of_players{
+                1 => "/connect_four_vs_computer".to_string(),
+                2 => "/connect_four_vs_human".to_string(),
+                _ => "/".to_string()
+            };
             return html! {
                 <>
-                    <h5 class={"w3-text-red"}>{format!("The winner is: {}", self.winner_name.clone())}</h5>
-                    <a href={"/"}>{"Click here to go back to the home menu"}</a>
+                    <h3 class={"w3-text-green"}>{format!("The winner is: {}", self.winner_name.clone())}</h3>
+                    <a href={restart_string}>{"Click here to restart the game"}</a>
                 </>
             };
         };
