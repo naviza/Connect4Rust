@@ -522,10 +522,10 @@ impl Component for GameBoard {
             };
             secondary_input = html! {
                 <>
-                    <button class="w3-button w3-circle w3-teal" disabled={self.submitPlayer1ButtonDisabled}
+                    <button class="w3-button w3-white w3-border w3-border-blue w3-round-large" disabled={self.submitPlayer1ButtonDisabled}
                         onclick={ctx.link().callback(|_event: MouseEvent| GameBoardMsg::DecreaseAIDifficulty)}>{"-"}</button>
                     {ai_string}
-                    <button class="w3-button w3-circle w3-teal" disabled={self.submitPlayer1ButtonDisabled}
+                    <button class="w3-button w3-white w3-border w3-border-blue w3-round-large" disabled={self.submitPlayer1ButtonDisabled}
                         onclick={ctx.link().callback(|_event: MouseEvent| GameBoardMsg::IncreaseAIDifficulty)}>{"+"}</button>
                 </>
             };
