@@ -1,3 +1,4 @@
+use connect4_lib::game::Game;
 use yew::{prelude::*, html, Children, Component, Html, Properties};
 use log::log;
 use std::num::ParseIntError;
@@ -47,33 +48,8 @@ impl Component for GameHistory {
 
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let mut veccer = Vec::new();
-
-        // let result = reqwest::get("https://api.spotify.com/v1/search");
-        // log::info!("{:?}", result);
-
-        veccer.push(
-            GameData {
-                id: "id1".to_string(),
-                player1: "player1".to_string(),
-                player2: "player2".to_string(),
-                gametype: "Connect4".to_string(),
-                winner: "player1".to_string(),
-                whenplayed: "2022-04-09 20:59:40".to_string(),
-            }
-        );
         
-        veccer.push(
-            GameData {
-                id: "id1".to_string(),
-                player1: "player2".to_string(),
-                player2: "player1".to_string(),
-                gametype: "Toot-Otto".to_string(),
-                winner: "player1".to_string(),
-                whenplayed: "2022-04-09 20:59:24".to_string(),
-            }
-        );
-        
+        let veccer = make_game_history_data();
 
         let history_table = make_history_table(&ctx, veccer);
         html! { 
@@ -100,12 +76,12 @@ impl Component for GameHistory {
 fn make_history_row(ctx: &Context<GameHistory>, data: &GameData) -> Html {
     html!{
         <tr>
-            <td>{data.id.clone()}</td>
-            <td>{data.gametype.clone()}</td>
-            <td>{data.player1.clone()}</td>
-            <td>{data.player2.clone()}</td>
-            <td>{data.winner.clone()}</td>
-            <td>{data.whenplayed.clone()}</td>
+            <td style={"padding:8px"}>{data.id.clone()}</td>
+            <td style={"padding:8px"}>{data.gametype.clone()}</td>
+            <td style={"padding:8px"}>{data.player1.clone()}</td>
+            <td style={"padding:8px"}>{data.player2.clone()}</td>
+            <td style={"padding:8px"}>{data.winner.clone()}</td>
+            <td style={"padding:8px"}>{data.whenplayed.clone()}</td>
         </tr>
     }
 }
@@ -116,14 +92,14 @@ fn make_history_table(ctx: &Context<GameHistory>, datum: Vec<GameData>) -> Html 
         game_rows.push(make_history_row(&ctx, &datum[i]));
     }
     html! {
-        <table border={"1"}>
+        <table border={"1"} class={"w3-table w3-striped w3-bordered"}>
             <tr>
-                <th>{"Game-ID"}</th>
-                <th>{"Game Type"}</th>
-                <th>{"Player1"}</th>
-                <th>{"Player2"}</th>
-                <th>{"Winner"}</th>
-                <th>{"When Played"}</th>
+                <th style={"padding:16px"}>{"Game-ID"}</th>
+                <th style={"padding:16px"}>{"Game Type"}</th>
+                <th style={"padding:16px"}>{"Player1"}</th>
+                <th style={"padding:16px"}>{"Player2"}</th>
+                <th style={"padding:16px"}>{"Winner"}</th>
+                <th style={"padding:16px"}>{"When Played"}</th>
             </tr>
             {game_rows}
         </table>
@@ -155,3 +131,76 @@ fn make_history_table(ctx: &Context<GameHistory>, datum: Vec<GameData>) -> Html 
 
 //     Ok(())
 // }
+
+fn make_game_history_data() -> Vec<GameData> {
+    let mut veccer = Vec::new();
+
+        // let result = reqwest::get("https://api.spotify.com/v1/search");
+        // log::info!("{:?}", result);
+
+        veccer.push(
+            GameData {
+                id: "1".to_string(),
+                player1: "Taranjot".to_string(),
+                player2: "Ralph".to_string(),
+                gametype: "Connect4".to_string(),
+                winner: "Ralph".to_string(),
+                whenplayed: "2022-04-09 20:32:40".to_string(),
+            }
+        );
+        
+        veccer.push(
+            GameData {
+                id: "2".to_string(),
+                player1: "Anuj".to_string(),
+                player2: "Ralph".to_string(),
+                gametype: "Toot-Otto".to_string(),
+                winner: "Anuj".to_string(),
+                whenplayed: "2022-04-09 20:18:24".to_string(),
+            }
+        );
+
+        veccer.push(
+            GameData {
+                id: "3".to_string(),
+                player1: "Anuj".to_string(),
+                player2: "Computer".to_string(),
+                gametype: "Toot-Otto".to_string(),
+                winner: "Computer".to_string(),
+                whenplayed: "2022-04-09 20:32:40".to_string(),
+            }
+        );
+        
+        veccer.push(
+            GameData {
+                id: "4".to_string(),
+                player1: "Anuj".to_string(),
+                player2: "Richmond".to_string(),
+                gametype: "Toot-Otto".to_string(),
+                winner: "Anuj".to_string(),
+                whenplayed: "2022-04-09 20:18:24".to_string(),
+            }
+        );
+        veccer.push(
+            GameData {
+                id: "5".to_string(),
+                player1: "Richmond".to_string(),
+                player2: "Computer".to_string(),
+                gametype: "Connect4".to_string(),
+                winner: "Computer".to_string(),
+                whenplayed: "2022-04-09 21:22:37".to_string(),
+            }
+        );
+        veccer.push(
+            GameData {
+                id: "6".to_string(),
+                player1: "Taranjot".to_string(),
+                player2: "Computer".to_string(),
+                gametype: "Toot-Otto".to_string(),
+                winner: "Taranjot".to_string(),
+                whenplayed: "2022-04-09 21:22:37".to_string(),
+            }
+        );
+
+        veccer
+}

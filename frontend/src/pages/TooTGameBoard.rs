@@ -683,8 +683,8 @@ fn toot_render_cell(gamepiece: char, ctx: &Context<TooTGameBoard>, column: u8) -
         '0' => "w3-container w3-white",
         '1' => "w3-container w3-red",
         '2' => "w3-container w3-yellow",
-        't' => "w3-container w3-red",
-        'o' => "w3-container w3-white",
+        'T' => "w3-container w3-yellow",
+        'O' => "w3-container w3-red",
         _ => "w3-container w3-white",
     };
     html! {
