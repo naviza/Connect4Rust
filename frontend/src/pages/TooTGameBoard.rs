@@ -424,6 +424,10 @@ impl Component for TooTGameBoard {
                             _ => "Error".to_string(),
                         };
                         log::info!("Player {} has won the game!", x);
+                        if x == 2 && self.number_of_players == 1{
+                            // computer won.
+                            self.winner_name = "Computer".to_string();
+                        }
                     }
                 }
                 // print_state(&self.game_state, self.height, self.width);
@@ -587,10 +591,15 @@ impl Component for TooTGameBoard {
         };
 
         if self.game_is_done {
+            let restart_string = match self.number_of_players{
+                1 => "/toot_otto_vs_computer".to_string(),
+                2 => "/toot_otto_vs_human".to_string(),
+                _ => "/".to_string()
+            };
             return html! {
                 <>
-                    <h5 class={"w3-text-red"}>{format!("The winner is: {}", self.winner_name.clone())}</h5>
-                    <a href={"/"}>{"Click here to go back to the home menu"}</a>
+                    <h5 class={"w3-text-green"}>{format!("The winner is: {}", self.winner_name.clone())}</h5>
+                    <a href={restart_string}>{"Click here to restart the game"}</a>
                 </>
             };
         };

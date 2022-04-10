@@ -419,6 +419,10 @@ impl Component for GameBoard {
                             _ => "Error".to_string(),
                         };
                         log::info!("Player {} has won the game!", x);
+                        if x == 2 && self.number_of_players == 1{
+                            // computer won.
+                            self.winner_name = "Computer".to_string();
+                        }
                     }
                 }
                 // print_state(&self.game_state, self.height, self.width);
@@ -570,6 +574,11 @@ impl Component for GameBoard {
                 2 => "/connect_four_vs_human".to_string(),
                 _ => "/".to_string()
             };
+            // let winner_is_string = match self.number_of_players{
+            //     1 => format!("The winner is: {}", self.winner_name.clone()),
+            //     2 => format!("The winner is: {}", self.winner_name.clone()),
+            //     _ => "/".to_string()
+            // };
             return html! {
                 <>
                     <h3 class={"w3-text-green"}>{format!("The winner is: {}", self.winner_name.clone())}</h3>
