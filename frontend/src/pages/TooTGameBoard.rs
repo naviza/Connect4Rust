@@ -320,8 +320,8 @@ impl Component for TooTGameBoard {
 
     fn create(ctx: &Context<Self>) -> Self {
         let mut g_state = "".to_string();
-        let width: isize = 7;
-        let height: isize = 6;
+        let width: isize = 6;
+        let height: isize = 4;
         for _ in 0..(width * height) {
             g_state += "x";
         }
