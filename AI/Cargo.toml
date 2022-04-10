@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 connect4-lib = "*"
+rand ="*"
+ran = "*"

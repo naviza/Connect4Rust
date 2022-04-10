@@ -1,8 +1,8 @@
 use connect4_lib::ai::*;
 use connect4_lib::game::*;
 use connect4_lib::games::*;
-use connect4_lib::io::*;
-use connect4_lib::play;
+use ran::*;
+
 use yew::{html, prelude::*, Children, Component, Html, Properties};
 
 pub struct GameBoard {
@@ -26,9 +26,9 @@ pub struct GameBoard {
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum MyAi {
-    Hard,
-    Med,
-    Easy,
+    Hard(isize,isize),       //4000,6
+    Med(isize,isize),        //1000,4
+    Easy(isize,isize),       //5,2
     Human,
 }
 
@@ -73,6 +73,134 @@ impl PlayerTurn {
     }
 }
 
+pub fn my_evaluate_board(game: &mut Game, ite : isize, depth: isize) -> (isize, isize, ChipDescrip) {
+    let is_max = game.get_turn() % 2 == 0;
+
+    fn my_test_move(mov: isize, chip: ChipDescrip, game: &mut Game, ite : isize, depth: isize) -> isize {
+        game.play(mov, chip);
+        let mut score = my_minmax_search(game, depth) << (14 as isize);
+        if score == 0 {
+            score = my_monte_carlo_search(game, ite);
+        }
+        game.undo_move();
+        score
+    }
+
+    let mut potentials: Vec<(isize, isize, ChipDescrip)> = game
+        .get_board()
+        .get_valid_moves()
+        .iter()
+        .flat_map(|&mov| {
+            game.current_player()
+                .chip_options
+                .iter()
+                .map(move |&c| (mov, c))
+        })
+        .map(|(mov, c)| (my_test_move(mov, c, &mut game.clone(), ite, depth), mov, c))
+        .collect();
+
+    potentials.sort_by(|a, b| {
+        if is_max {
+            (b.0).partial_cmp(&a.0).unwrap()
+        } else {
+            (a.0).partial_cmp(&b.0).unwrap()
+        }
+    });
+
+    // println!("{:?}", potentials);
+    let (score, b_mov, c) = potentials[0];
+    (score >> (14 as isize), b_mov, c)
+}
+
+fn my_monte_carlo_search(game: &mut Game, iter: isize) -> isize {
+    let mut score = 0;
+    (0..iter).for_each(|_| {
+        let mut moves = 0;
+        let mut res = BoardState::Ongoing;
+        let mut finished = false;
+        while !finished {
+            match res {
+                BoardState::Ongoing => {
+                    let m = game.get_board().get_valid_moves();
+                    log::info!("STILL CHOOSING");
+                    let lb = 0;
+                    let up = m.len() as i64 - 1;
+                    let r : usize = ran_irange(lb, up) as usize;
+                    let mov = m[r];
+                    let up1 = game.current_player().chip_options.len() as i64 - 1;
+                    let r : usize = ran_irange(lb, up1) as usize;
+                    let chip = game.current_player().chip_options[r];
+                    res = game.play(mov, chip);
+                    moves += 1;
+                }
+                BoardState::Invalid => {
+                    moves -= 1;
+                    res = BoardState::Ongoing;
+                }
+                BoardState::Draw => {
+                    finished = true;
+                }
+                BoardState::Win(x) => {
+                    if x == 1 {
+                        score += 1
+                    } else {
+                        score -= 1
+                    }
+                    finished = true;
+                }
+            }
+        }
+        for _ in 0..moves {
+            game.undo_move()
+        }
+    });
+
+    score
+}
+
+static mut COUNT: isize = 0;
+// specifically a 2 player AI
+// returns < 0 if player 2 wins
+// returns > 0 if player 1 wins
+fn my_minmax_search(game: &mut Game, depth: isize) -> isize {
+    unsafe {
+        COUNT += 1;
+    }
+    if depth == 0 {
+        return 0;
+    }
+
+    let is_max = game.get_turn() % 2 == 0;
+    if game.get_player(1).just_won(&game) {
+        return -(depth as isize);
+    }
+    if game.get_player(0).just_won(&game) {
+        return depth as isize;
+    }
+
+    let minmax: fn(isize, isize) -> isize = if is_max { std::cmp::max } else { std::cmp::min };
+
+    let mut score = if is_max {
+        std::isize::MIN
+    } else {
+        std::isize::MAX
+    };
+
+    let moves = game.get_board().get_valid_moves();
+    let player = game.current_player().clone();
+    for mov in moves {
+        for chip in &player.chip_options {
+            game.play_no_check(mov, *chip);
+            score = minmax(score, my_minmax_search(game, depth - 1));
+            game.undo_move();
+        }
+    }
+    score
+}
+
+
+
+
 impl GameBoard {
     fn find(&mut self, col: usize, player: &str) -> String {
         log::info!(" FIND FUNCTION");
@@ -107,17 +235,15 @@ impl GameBoard {
     fn make_ai_turn(&mut self) -> BoardState {
         log::info!("MADE IT TO AI TURN");
 
-        let ai = match self.ai.clone() {
-            MyAi::Easy => EASY_AI,
-            MyAi::Med => MID_AI,
-            MyAi::Hard => HARD_AI,
-            _ => {
-                //should never be human
-                EASY_AI // should never do this one
-            }
+        let (iter, depth) = match self.ai.clone() {
+            MyAi::Easy(i,d) => (i,d),
+            MyAi::Med(i,d) => (i,d),
+            MyAi::Hard(i,d) => (i,d),
+            _ => (0,0),
         };
+
         log::info!("MADE IT past");
-        let (col, chip) = get_best_move(&mut self.internal_game, ai);
+        let (_,col, chip) = my_evaluate_board(&mut self.internal_game, iter, depth);
 
         // make the play
         log::info!("col = {}", col);
@@ -228,7 +354,7 @@ impl Component for GameBoard {
         let ai = if ctx.props().number_of_players == 2 {
             MyAi::Human
         } else {
-            MyAi::Med
+            MyAi::Med(1000,4)
         };
         Self {
             player1_name_input: "".to_string(),
@@ -324,9 +450,9 @@ impl Component for GameBoard {
             GameBoardMsg::IncreaseAIDifficulty => {
                 // log::info!("Increasing AI difficulty");
                 match self.ai.clone() {
-                    MyAi::Easy => self.ai = MyAi::Med,
-                    MyAi::Hard => self.ai = MyAi::Hard,
-                    MyAi::Med => self.ai = MyAi::Hard,
+                    MyAi::Easy(_,_) => self.ai = MyAi::Med(1000,4),
+                    MyAi::Hard(_,_) => {},
+                    MyAi::Med(_,_) => self.ai = MyAi::Hard(4000,6),
                     MyAi::Human => {
                         log::info!("Error. You shouldn't be changing AI difficulty with 2 players.")
                     }
@@ -336,9 +462,9 @@ impl Component for GameBoard {
             GameBoardMsg::DecreaseAIDifficulty => {
                 // log::info!("Decreasing AI difficulty");
                 match self.ai.clone() {
-                    MyAi::Easy => self.ai = MyAi::Easy,
-                    MyAi::Hard => self.ai = MyAi::Med,
-                    MyAi::Med => self.ai = MyAi::Easy,
+                    MyAi::Easy(_,_) => {},
+                    MyAi::Hard(_,_) => self.ai = MyAi::Med(1000,4),
+                    MyAi::Med(_,_) => self.ai = MyAi::Easy(5,2),
                     MyAi::Human => {
                         log::info!("Error. You shouldn't be changing AI difficulty with 2 players.")
                     }
@@ -385,9 +511,9 @@ impl Component for GameBoard {
         if one_player_only {
             // if there's only 1 player, 2nd input is ai difficulty
             let ai_string = match self.ai {
-                MyAi::Easy => "Easy",
-                MyAi::Hard => "Hard",
-                MyAi::Med => "Medium",
+                MyAi::Easy(_,_) => "Easy",
+                MyAi::Hard(_,_) => "Hard",
+                MyAi::Med(_,_) => "Medium",
                 MyAi::Human => "Error",
             };
             secondary_input = html! {
