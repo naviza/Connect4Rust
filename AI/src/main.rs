@@ -87,48 +87,62 @@ fn test() {
     };
     let p2_chips = ChipDescrip {
         bg_color: 60,
-        fg_color: 5,
+        fg_color: 2,
         graphic: '◼',
     };
-
-    let chip_options1: Vec<ChipDescrip> = vec![p1_chips];
-    let win_cond1: Vec<Vec<ChipDescrip>> = vec![
-        chip_options1.clone(),
-        chip_options1.clone(),
-        chip_options1.clone(),
-        chip_options1.clone(),
-    ];
-
-    let chip_options2: Vec<ChipDescrip> = vec![p2_chips];
-    let win_cond2: Vec<Vec<ChipDescrip>> = vec![
-        chip_options2.clone(),
-        chip_options2.clone(),
-        chip_options2.clone(),
-        chip_options2.clone(),
-    ];
+    let co1 = four_in_a_row(p1_chips);
+    let co2 = four_in_a_row(p2_chips);
     let player1 = Player {
         player_type: PlayerType::Local,
-        chip_options: chip_options1.clone(),
-        win_conditions: win_cond1.clone(),
+        chip_options: co1.clone(),
+        win_conditions: vec![
+            co1.clone(),
+            co1.clone(),
+            co1.clone(),
+            co1.clone(),
+        ],
     };
-
     let player2 = Player {
-        player_type: PlayerType::AI(HARD_AI),
-        chip_options: chip_options2.clone(),
-        win_conditions: win_cond2.clone(),
+        player_type: PlayerType::Local,
+        chip_options: co2.clone(),
+        win_conditions: vec![
+            co2.clone(),
+            co2.clone(),
+            co2.clone(),
+            co2.clone(),
+        ],
     };
 
     let mut my_game = Game::new(board, vec![player1, player2]);
 
-    my_game.play(0, p1_chips);
+    my_game.play(2, p1_chips);
+
+    println!("{:?}", my_game.get_board_layout());
+
+
+    let (col, chip) = get_best_move(&mut my_game, EASY_AI);
+
+    println!("col = {}, chip = {:?}", col, chip);
+
 }
 
 fn main() {
     //run();
 
     //test();
+    //let mut game = connect4_custom(PlayerType::Local, PlayerType::AI(HARD_AI));
+    
+    let mut state = "x".to_string();
+    let temp = state.as_bytes();
 
-    let mut x = PlayerTurn::Player2;
-    x = x.flip();
-    println!("{:?}",x);
+    for i in temp {
+        println!("{}",i);
+    }
+
+    let mut game = toto_custom(PlayerType::Local, PlayerType::Local);
+    let t = TermIO::new();
+
+
+    println!("{:?}", game.current_player().chip_options);
+    //play(&mut game, t);
 }

@@ -28,7 +28,7 @@ impl Component for Connect4Computer {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! { 
             <>
-                // <GameBoard game_type={GameType::ConnectFour} number_of_players=1 />
+                <GameBoard game_type={GameType::Connect4} number_of_players=1 />
             </>
         }
     }
