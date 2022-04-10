@@ -5,6 +5,8 @@ use connect4_lib::io::*;
 use connect4_lib::play;
 use yew::{html, prelude::*, Children, Component, Html, Properties};
 
+use crate::pages::GameBoard::print_state;
+
 pub struct TooTGameBoard {
     player1_name_input: String,
     player2_name_input: String,
@@ -22,6 +24,8 @@ pub struct TooTGameBoard {
     number_of_players: usize,
     game_is_done: bool,
     winner_name: String,
+
+    current_letter: char,
 }
 
 #[derive(Clone, Copy,PartialEq, Debug)]
@@ -50,6 +54,9 @@ pub enum TooTGameBoardMsg {
     DoNothing,
     IncreaseAIDifficulty,
     DecreaseAIDifficulty,
+
+    MakeOTurn,
+    MakeTTurn,
     
 }
 
@@ -263,6 +270,7 @@ impl Component for TooTGameBoard {
             game_type: ctx.props().game_type.clone(),
             game_is_done: false,
             winner_name: "".to_string(),
+            current_letter: 't',
         }
     }
 
@@ -281,7 +289,8 @@ impl Component for TooTGameBoard {
             TooTGameBoardMsg::SubmitTurn(col, letter) => {
                 print_state(&self.game_state, self.height, self.width);
                 
-                log::info!("Submitted column: {}", col);
+                log::info!("Submitted column: {}, letter: {}", col, self.current_letter);
+
 
                 // let col = 5; //change to the input column
                 match self.make_turn(col as usize) {
@@ -354,6 +363,8 @@ impl Component for TooTGameBoard {
                 }
                 return true;
             },
+            TooTGameBoardMsg::MakeOTurn => {self.current_letter = 'o'; return true;},
+            TooTGameBoardMsg::MakeTTurn => {self.current_letter = 't'; return true;},
         }
         false
     }
@@ -439,19 +450,27 @@ impl Component for TooTGameBoard {
             };
         }
 
-        let game_state_table = render_table(&self.game_state, self.width, self.height, &ctx);
+        let game_state_table = toot_render_table(&self.game_state, self.width, self.height, &ctx);
         let mut game_table = html!{<></>};
         if one_player_only {
             if self.submitPlayer1ButtonDisabled { // if true, game has started
             // log::info!("Game started");
-                game_table = render_table(&self.game_state, self.width, self.height, &ctx);
+                game_table = toot_render_table(&self.game_state, self.width, self.height, &ctx);
             }
         } else {
             if self.submitPlayer1ButtonDisabled && self.submitPlayer2ButtonDisabled { // if true, game has started
                 // log::info!("Game started");
-                game_table = render_table(&self.game_state, self.width, self.height, &ctx);
+                game_table = toot_render_table(&self.game_state, self.width, self.height, &ctx);
             }
         }
+
+        let mut turn_letter = html!{
+            <>
+                <button onclick={ctx.link().callback(|_event: MouseEvent| TooTGameBoardMsg::MakeTTurn)}>{"T"}</button>
+                <button onclick={ctx.link().callback(|_event: MouseEvent| TooTGameBoardMsg::MakeOTurn)}>{"O"}</button>
+                <p>{format!("Current Selection: {}", self.current_letter)}</p>
+            </>
+        };
 
         if self.game_is_done {
             return html! {
@@ -461,6 +480,8 @@ impl Component for TooTGameBoard {
                 </>
             }
         };
+
+
         
         html! { 
             <>
@@ -468,13 +489,14 @@ impl Component for TooTGameBoard {
                 {player1_input} <br />
                 {secondary_input}
                 <p> {self.sample_text.clone()} </p>
+                {turn_letter}
                 {game_table}
             </>
         }
     }
 }
 
-fn print_state(gameState: &String, height: usize, width: usize) -> () {
+fn toot_print_state(gameState: &String, height: usize, width: usize) -> () {
     let mut state_holder = "\n".to_string();
     for i in 0..height{
         let start = width*i;
@@ -486,12 +508,12 @@ fn print_state(gameState: &String, height: usize, width: usize) -> () {
     log::info!("{}", state_holder);
 }
 
-fn render_row(gameRow: &str, width: usize, height:usize, ctx:   &Context<TooTGameBoard>) -> Html {
+fn toot_render_row(gameRow: &str, width: usize, height:usize, ctx:   &Context<TooTGameBoard>) -> Html {
     let mut vec_holder = Vec::new();
     let my_vec: Vec<char> = gameRow.chars().collect();
     for i in 0..my_vec.len(){
         let column_choice = i as u8;
-        vec_holder.push(render_cell(my_vec[i], ctx, column_choice));
+        vec_holder.push(toot_render_cell(my_vec[i], ctx, column_choice));
     }
     html! {
         <tr>
@@ -500,7 +522,7 @@ fn render_row(gameRow: &str, width: usize, height:usize, ctx:   &Context<TooTGam
     }
 }
 
-fn render_table(gameState: &String, width: usize, height:usize, ctx:   &Context<TooTGameBoard>) -> Html {
+fn toot_render_table(gameState: &String, width: usize, height:usize, ctx:   &Context<TooTGameBoard>) -> Html {
     let mut game_rows = Vec::new();
     for i in 0..height{
         let start = width*i;
@@ -508,7 +530,7 @@ fn render_table(gameState: &String, width: usize, height:usize, ctx:   &Context<
         // log::info!("start {}", start);
         // log::info!("end {}", end);
         let holder = &gameState[start..=end];
-        game_rows.push(render_row(&holder, width, height, &ctx));
+        game_rows.push(toot_render_row(&holder, width, height, &ctx));
     }
     html! {
         <table border={"1"}>
@@ -517,7 +539,7 @@ fn render_table(gameState: &String, width: usize, height:usize, ctx:   &Context<
     }
 }
 
-fn render_cell(gamepiece: char, ctx:   &Context<TooTGameBoard>, column: u8) -> Html {
+fn toot_render_cell(gamepiece: char, ctx:   &Context<TooTGameBoard>, column: u8) -> Html {
     // let turn_choice = *column;
     if gamepiece == '1' {
         return html! {
