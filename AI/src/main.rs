@@ -127,8 +127,62 @@ fn main() {
     //run();
 
     //test();
+    let board = Board::new(7, 6);
+    let p1_chips = ChipDescrip {
+        bg_color: 60,
+        fg_color: 1,
+        graphic: 'T',
+    };
 
-    let mut x = PlayerTurn::Player2;
-    x = x.flip();
-    println!("{:?}",x);
+    let p2_chips = ChipDescrip {
+        bg_color: 60,
+        fg_color: 2,
+        graphic: 'O',
+    };
+
+    let co1 = wrap_4_check(p1_chips, p2_chips);
+
+    let co2 = wrap_4_check(p2_chips, p1_chips);
+    
+    let player1 = Player {
+        player_type: PlayerType::Local,
+        chip_options: co1.clone(),
+        win_conditions: vec![
+            co1.clone(),
+            co1.clone(),
+            co1.clone(),
+            co1.clone(),
+        ],
+    };
+
+    let player2 = Player {
+        player_type: PlayerType::Local,
+        chip_options: co2.clone(),
+        win_conditions: vec![
+            co2.clone(),
+            co2.clone(),
+            co2.clone(),
+            co2.clone(),
+        ],
+    };
+
+    let mut my_game = Game::new(board, vec![player1, player2]);
+
+    my_game.play(0, p2_chips);
+    my_game.play(0, p1_chips);
+    my_game.play(0, p1_chips);
+    let s = my_game.play(0, p2_chips);
+
+    match s {
+        BoardState::Ongoing => {
+    
+        }
+        BoardState::Invalid => {
+        }
+        BoardState::Draw => {
+        }
+        BoardState::Win(x) => {
+            println!("Player {} has won", x);
+        }
+    }
 }
