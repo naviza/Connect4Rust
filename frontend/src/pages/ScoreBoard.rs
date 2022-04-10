@@ -77,7 +77,7 @@ impl Component for ScoreBoard {
         html! { 
             <>
             
-                <h1>{"SCORE BOARD"}</h1>
+                <h1 style={"font-size:50px"}>{"SCORE BOARD"}</h1>
 
                 <h1>{"Games Won by Computer"}</h1>
                 {make_games_won_by_computer_summary(&ctx, 3, 1, 2)}

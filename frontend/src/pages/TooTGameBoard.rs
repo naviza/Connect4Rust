@@ -535,10 +535,10 @@ impl Component for TooTGameBoard {
             };
             secondary_input = html! {
                 <>
-                    <button class="w3-button w3-circle w3-teal" disabled={self.submit_player1_button_disabled}
+                    <button class="w3-button w3-white w3-border w3-border-blue w3-round-large" disabled={self.submit_player1_button_disabled}
                         onclick={ctx.link().callback(|_event: MouseEvent| TooTGameBoardMsg::DecreaseAIDifficulty)}>{"-"}</button>
                     {ai_string}
-                    <button class="w3-button w3-circle w3-teal" disabled={self.submit_player1_button_disabled}
+                    <button class="w3-button w3-white w3-border w3-border-blue w3-round-large" disabled={self.submit_player1_button_disabled}
                         onclick={ctx.link().callback(|_event: MouseEvent| TooTGameBoardMsg::IncreaseAIDifficulty)}>{"+"}</button>
                 </>
             };
@@ -584,8 +584,8 @@ impl Component for TooTGameBoard {
 
         let mut turn_letter = html! {
             <>
-                <button onclick={ctx.link().callback(|_event: MouseEvent| TooTGameBoardMsg::MakeTTurn)}>{"T"}</button>
-                <button onclick={ctx.link().callback(|_event: MouseEvent| TooTGameBoardMsg::MakeOTurn)}>{"O"}</button>
+                <button class={"w3-button w3-white w3-border w3-border-orange"} onclick={ctx.link().callback(|_event: MouseEvent| TooTGameBoardMsg::MakeTTurn)}>{"T"}</button>
+                <button class={"w3-button w3-white w3-border w3-border-red"} onclick={ctx.link().callback(|_event: MouseEvent| TooTGameBoardMsg::MakeOTurn)}>{"O"}</button>
                 <p>{format!("Current Selection: {}", self.current_letter)}</p>
             </>
         };

@@ -78,6 +78,7 @@ fn toot_otto_against_computer() -> Html {
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
     html!{<div class="w3-panel w3-padding-64" style="padding-left: 80px">
         <h1>{ "Toot-Otto 1 Player" }</h1>
+        <br/ >
         <TooTGameBoard game_type={TooTGameType::TooTOttO} number_of_players=1 />
         <br/ ><br/ >
         <button onclick={onclick_callback1}>{ "Go Home" }</button>
@@ -118,7 +119,7 @@ fn c4_against_computer() -> Html {
     html! {
         <div class="w3-panel w3-padding-64" style="padding-left: 80px">
         <h1>{ "Connect4 1 player" }</h1>
-        <br /><br />
+        <br />
         <GameBoard game_type={GameType::Connect4} number_of_players=1 />
         <br/ ><br/ >
         <button onclick={onclick_callback1}>{ "Go to Home" }</button>
@@ -147,7 +148,7 @@ fn game_history_main() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
     html! {
-        <div class="w3-panel w3-padding-64" style="padding-left: 80px">
+        <div class="w3-panel w3-padding-64" style="padding-left: 80px;padding-right: 80px">
         <GameHistory />
         <br/ ><br/ >
         <button onclick={onclick_callback1}>{ "Go to Home" }</button>
@@ -161,7 +162,7 @@ fn score_board_main() -> Html {
     let history = use_history().unwrap();
     let onclick_callback1 = Callback::from(move |_| history.push(Route::Home));
     html! {
-        <div class="w3-panel w3-padding-64" style="padding-left: 80px">
+        <div class="w3-panel w3-padding-64" style="padding-left: 80px;padding-right: 80px">
         <ScoreBoard />
         <br/ ><br/ >
         <button onclick={onclick_callback1}>{ "Go to Home" }</button>
