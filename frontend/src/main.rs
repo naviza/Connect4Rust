@@ -10,6 +10,8 @@ use crate::pages::Connect4Computer::Connect4Computer;
 use crate::pages::TootOttoInstruction::TootOttoInstruction;
 use crate::pages::GameBoard::GameBoard;
 use crate::pages::GameBoard::GameType;
+use crate::pages::TooTGameBoard::TooTGameType;
+use crate::pages::TooTGameBoard::TooTGameBoard;
 use crate::pages::ScoreBoard::ScoreBoard;
 use crate::pages::GameHistory::GameHistory;
 
@@ -64,7 +66,7 @@ fn toot_otto_against_human() -> Html {
     <>
         <h1>{ "Toot-Otto 2 Players" }</h1>
         <button onclick={onclick_callback1}>{ "Go Home" }</button>
-        <GameBoard game_type={GameType::TooTOttO} number_of_players=2 />
+        <TooTGameBoard game_type={TooTGameType::TooTOttO} number_of_players=2 />
     </>}
 }
 
@@ -75,7 +77,7 @@ fn toot_otto_against_computer() -> Html {
     html!{<>
         <h1>{ "Toot-Otto 1 Player" }</h1>
         <button onclick={onclick_callback1}>{ "Go Home" }</button>
-        <GameBoard game_type={GameType::TooTOttO} number_of_players=1 />
+        <TooTGameBoard game_type={TooTGameType::TooTOttO} number_of_players=1 />
     </>}
 }
 
